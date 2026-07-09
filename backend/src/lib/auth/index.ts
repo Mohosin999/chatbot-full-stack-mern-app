@@ -1,0 +1,56 @@
+import { userExist, createUser, findUserByEmail } from "../user";
+import { badRequest } from "../../utils/error";
+import { generateHash, hashMatched } from "../../utils/hashing";
+import { generateAccessToken, generateRefreshToken } from "../token";
+import User from "../../model/User";
+
+const register = async ({
+  name,
+  email,
+  password,
+}: {
+  name: string;
+  email: string;
+  password: string;
+}) => {
+  const hasUser = await userExist(email);
+  if (hasUser) {
+    throw badRequest("User already exist");
+  }
+
+  const hashedPassword = await generateHash(password);
+  const user = await createUser({ name, email, password: hashedPassword });
+
+  return user;
+};
+
+const login = async ({ email, password }: { email: string; password: string }) => {
+  const user = await findUserByEmail(email);
+  if (!user) {
+    throw badRequest("Invalid Credentials");
+  }
+
+  const matched = await hashMatched(password, user.password);
+  if (!matched) {
+    throw badRequest("Invalid Credentials");
+  }
+
+  const payload = {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: (user as any).role,
+  };
+
+  const accessToken = generateAccessToken({ payload });
+  const { refreshToken, expiresAt } = generateRefreshToken();
+
+  await User.findByIdAndUpdate(user.id, {
+    refreshToken,
+    refreshTokenExpiresAt: expiresAt,
+  });
+
+  return { accessToken, refreshToken };
+};
+
+export { register, login };

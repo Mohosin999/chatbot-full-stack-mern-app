@@ -1,0 +1,36 @@
+import { Schema, model, Document } from "mongoose";
+
+export interface IUserDocument extends Document {
+  name: string;
+  email: string;
+  password: string;
+  refreshToken?: string | null;
+  refreshTokenExpiresAt?: Date | null;
+}
+
+const userSchema = new Schema<IUserDocument>(
+  {
+    name: {
+      type: String,
+      maxLength: 50,
+      minLength: 5,
+      required: true,
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    password: {
+      type: String,
+      required: true,
+    },
+    refreshToken: { type: String, default: null },
+    refreshTokenExpiresAt: { type: Date, default: null },
+  },
+  { timestamps: true, id: true }
+);
+
+const User = model<IUserDocument>("User", userSchema);
+
+export default User;
