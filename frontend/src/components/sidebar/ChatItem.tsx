@@ -34,7 +34,7 @@ const ChatItem = ({
 
   return (
     <li
-      className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition select-none active:scale-105 ${
+      className={`flex items-center justify-between p-2 px-3 rounded-lg cursor-pointer transition select-none active:scale-105 ${
         isSelected ? "bg-[#303841]" : "hover:bg-[#303841]"
       }`}
     >

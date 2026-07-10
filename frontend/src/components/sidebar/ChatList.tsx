@@ -19,10 +19,7 @@ const ChatList = ({
   chats,
   currentChat,
   onSelectChat,
-  chatToDelete,
   setChatToDelete,
-  alertOpen,
-  setAlertOpen,
   onConfirmDelete,
 }: ChatListProps) => {
   if (!token)

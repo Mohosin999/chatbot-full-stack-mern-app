@@ -10,7 +10,7 @@ const generateChatTitle = async (
     model: "gemini-2.5-flash",
   });
 
-  const prompt = `Based on this conversation, generate a concise chat title (5-6 words) that summarizes the main topic. Do not use quotation marks, punctuation, or emojis. Return only the title as plain text.
+  const prompt = `Based on this conversation, generate a concise chat title (3 words) that summarizes the main topic. Do not use quotation marks, punctuation, or emojis. Return only the title as plain text.
 
 User: ${userPrompt}
 Assistant: ${assistantResponse}`;

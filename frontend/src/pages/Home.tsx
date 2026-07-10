@@ -24,7 +24,7 @@ const Home = () => {
           </Button>
 
           <div className="flex items-center justify-center mx-auto">
-            <h2 className="text-2xl font-bold ml-2">Chatbot</h2>
+            <h2 className="text-2xl font-semibold ml-2">Chatbot</h2>
           </div>
         </div>
       </header>
@@ -46,7 +46,7 @@ const Home = () => {
             onClick={() => setIsSidebarOpen(false)}
           ></div>
 
-          <div className="relative w-64 bg-[#181818] text-white h-full shadow-lg flex flex-col">
+          <div className="relative w-80 bg-[#181818] text-white h-full shadow-lg flex flex-col">
             <button
               className="absolute top-3 right-3 text-white hover:text-red-500"
               onClick={() => setIsSidebarOpen(false)}
