@@ -11,6 +11,7 @@ const router = Router();
 router
   .post("/api/v1/auth/register", authController.register)
   .post("/api/v1/auth/login", authController.login)
+  .post("/api/v1/auth/google", authController.googleLogin)
   .post("/api/v1/auth/logout", authenticate, authController.logout)
   .post(
     "/api/v1/auth/refresh",

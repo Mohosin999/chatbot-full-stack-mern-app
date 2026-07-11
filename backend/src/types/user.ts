@@ -3,7 +3,7 @@ export interface IUser {
   id: string;
   name: string;
   email: string;
-  password: string;
+  password?: string | null;
   refreshToken?: string | null;
   refreshTokenExpiresAt?: Date | null;
   createdAt?: Date;
@@ -15,7 +15,7 @@ export interface IUserDoc {
   id: string;
   name: string;
   email: string;
-  password: string;
+  password?: string | null;
   refreshToken?: string | null;
   refreshTokenExpiresAt?: Date | null;
 }

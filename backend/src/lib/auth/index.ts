@@ -1,8 +1,11 @@
+import { OAuth2Client } from "google-auth-library";
 import { userExist, createUser, findUserByEmail } from "../user";
 import { badRequest } from "../../utils/error";
 import { generateHash, hashMatched } from "../../utils/hashing";
 import { generateAccessToken, generateRefreshToken } from "../token";
 import User from "../../model/User";
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const register = async ({
   name,
@@ -30,6 +33,10 @@ const login = async ({ email, password }: { email: string; password: string }) =
     throw badRequest("Invalid Credentials");
   }
 
+  if (!user.password) {
+    throw badRequest("Invalid Credentials");
+  }
+
   const matched = await hashMatched(password, user.password);
   if (!matched) {
     throw badRequest("Invalid Credentials");
@@ -53,4 +60,47 @@ const login = async ({ email, password }: { email: string; password: string }) =
   return { accessToken, refreshToken };
 };
 
-export { register, login };
+const googleLogin = async ({ credential }: { credential: string }) => {
+  let payload;
+
+  try {
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    payload = ticket.getPayload();
+  } catch {
+    throw badRequest("Invalid Google credential");
+  }
+
+  if (!payload || !payload.email) {
+    throw badRequest("Invalid Google credential");
+  }
+
+  const email = payload.email;
+  const name = payload.name || email.split("@")[0];
+
+  let user = await findUserByEmail(email);
+
+  if (!user) {
+    user = await createUser({ name, email, password: null });
+  }
+
+  const tokenPayload = {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+  };
+
+  const accessToken = generateAccessToken({ payload: tokenPayload });
+  const { refreshToken, expiresAt } = generateRefreshToken();
+
+  await User.findByIdAndUpdate(user.id, {
+    refreshToken,
+    refreshTokenExpiresAt: expiresAt,
+  });
+
+  return { accessToken, refreshToken };
+};
+
+export { register, login, googleLogin };

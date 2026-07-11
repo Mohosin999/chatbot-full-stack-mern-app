@@ -23,9 +23,9 @@ const createUser = async ({
 }: {
   name: string;
   email: string;
-  password: string;
+  password?: string | null;
 }) => {
-  if (!name || !email || !password) throw badRequest("Invalid Parameters");
+  if (!name || !email) throw badRequest("Invalid Parameters");
 
   const user = new User({ name, email, password });
   await user.save();

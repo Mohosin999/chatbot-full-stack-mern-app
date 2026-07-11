@@ -3,7 +3,7 @@ import { Schema, model, Document } from "mongoose";
 export interface IUserDocument extends Document {
   name: string;
   email: string;
-  password: string;
+  password?: string | null;
   refreshToken?: string | null;
   refreshTokenExpiresAt?: Date | null;
 }
@@ -23,7 +23,8 @@ const userSchema = new Schema<IUserDocument>(
     },
     password: {
       type: String,
-      required: true,
+      required: false,
+      default: null,
     },
     refreshToken: { type: String, default: null },
     refreshTokenExpiresAt: { type: Date, default: null },

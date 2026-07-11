@@ -6,7 +6,8 @@ import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { LoaderCircle } from "lucide-react";
 
-import { clearError, loginUser } from "@/features/auth/authSlice";
+import { GoogleLogin } from "@react-oauth/google";
+import { clearError, loginUser, googleLogin } from "@/features/auth/authSlice";
 import { useAppSelector } from "@/hooks/useAppStore";
 
 import { Button } from "@/components/ui/button";
@@ -148,6 +149,33 @@ const Login = () => {
               </CardFooter>
             </form>
           </Form>
+
+          <div className="relative my-4">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-card px-2 text-muted-foreground">
+                Or continue with
+              </span>
+            </div>
+          </div>
+
+          <div className="flex justify-center">
+            <GoogleLogin
+              onSuccess={(credentialResponse) => {
+                if (credentialResponse.credential) {
+                  dispatch(googleLogin(credentialResponse.credential) as any);
+                }
+              }}
+              onError={() => {
+                toast.error("Google login failed");
+              }}
+              size="large"
+              shape="rectangular"
+              width="100%"
+            />
+          </div>
         </CardContent>
       </Card>
     </div>
