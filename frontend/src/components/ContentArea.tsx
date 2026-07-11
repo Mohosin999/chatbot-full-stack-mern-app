@@ -1,17 +1,18 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
+import { ChevronDown } from "lucide-react";
 import ChatInput, { type ChatInputHandle } from "./ui/ChatInput";
 import { useDispatch } from "react-redux";
 import Message from "./Message";
 import {
   createChat,
-  createMessage,
+  createMessageStream,
   getChatById,
-  updateChatName,
   addChatToAllChats,
   addTempMessage,
-  replaceTempMessage,
+  abortStream,
 } from "@/features/chat/chatSlice";
 import { useAppSelector } from "@/hooks/useAppStore";
+import type { Message as MessageType } from "@/types";
 
 const ContentArea = () => {
   const { currentChat, isGenerating } = useAppSelector((state) => state.chat);
@@ -19,7 +20,28 @@ const ContentArea = () => {
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const chatInputRef = useRef<ChatInputHandle>(null);
   const dispatch = useDispatch();
+  const [showScrollButton, setShowScrollButton] = useState(false);
 
+  useEffect(() => {
+    const container = chatContainerRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = container;
+      setShowScrollButton(scrollHeight - scrollTop - clientHeight > 100);
+    };
+
+    container.addEventListener("scroll", handleScroll);
+    return () => container.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const hasStreamingMessage = currentChat?.data?.messages?.some(
+    (msg: MessageType) => msg.isStreaming,
+  );
   const accessToken = localStorage.getItem("accessToken");
 
   useEffect(() => {
@@ -88,36 +110,20 @@ const ContentArea = () => {
 
     dispatch(
       addTempMessage({
-        id: "typing-indicator",
+        id: "streaming-msg",
         role: "assistant",
-        isTyping: true,
+        content: "",
+        isStreaming: true,
         isTemp: true,
       }),
     );
 
-    const messageRes = await dispatch(
-      createMessage({ prompt: text.trim(), chatId: currentChatId! }) as any,
+    dispatch(
+      createMessageStream({
+        prompt: text.trim(),
+        chatId: currentChatId!,
+      }) as any,
     );
-
-    if (messageRes.meta.requestStatus === "fulfilled") {
-      const finalMessage = messageRes.payload.data;
-
-      dispatch(
-        replaceTempMessage({
-          ...finalMessage,
-          isTyping: false,
-        }),
-      );
-
-      if (finalMessage.chatName) {
-        dispatch(
-          updateChatName({
-            chatId: currentChatId,
-            chatName: finalMessage.chatName,
-          }),
-        );
-      }
-    }
 
     chatInputRef.current?.focus();
   };
@@ -146,11 +152,19 @@ const ContentArea = () => {
 
             if (hasMessages) {
               return (
-                <div className="flex flex-col space-y-2 w-full md:max-w-2xl xl:max-w-3xl mx-auto mt-4">
+                <div className="flex flex-col space-y-2 w-full md:max-w-2xl xl:max-w-3xl mx-auto mt-4 relative">
                   {messages!.map((msg) => (
                     <Message key={msg.id} msg={msg} />
                   ))}
                   <div ref={messagesEndRef} />
+                  {showScrollButton && (
+                    <button
+                      onClick={scrollToBottom}
+                      className="fixed bottom-28 right-6 p-2 bg-blue-500 text-white rounded-full shadow-lg hover:bg-blue-600 transition z-10"
+                    >
+                      <ChevronDown size={20} />
+                    </button>
+                  )}
                 </div>
               );
             }
@@ -168,7 +182,12 @@ const ContentArea = () => {
       </div>
 
       <div className="w-full md:max-w-2xl xl:max-w-3xl mx-auto">
-        <ChatInput ref={chatInputRef} onSend={handleSend} />
+        <ChatInput
+          ref={chatInputRef}
+          onSend={handleSend}
+          isStreaming={hasStreamingMessage}
+          onStop={abortStream}
+        />
       </div>
     </div>
   );

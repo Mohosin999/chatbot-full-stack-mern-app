@@ -12,9 +12,11 @@ export interface ChatInputHandle {
 
 interface ChatInputProps {
   onSend: (text: string) => void;
+  isStreaming?: boolean;
+  onStop?: () => void;
 }
 
-const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(({ onSend }, ref) => {
+const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(({ onSend, isStreaming, onStop }, ref) => {
   const [value, setValue] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const token = localStorage.getItem("accessToken") || "";
@@ -77,7 +79,14 @@ const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(({ onSend }, ref) 
         )}
 
         <div className="absolute right-2 top-1/2 -translate-y-1/2">
-          {value.trim().length > 0 && token ? (
+          {isStreaming ? (
+            <button
+              onClick={onStop}
+              className="h-8 w-8 flex items-center justify-center rounded-lg bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 active:scale-95 transition-all cursor-pointer"
+            >
+              <span className="text-sm font-bold text-gray-700 dark:text-gray-200">■</span>
+            </button>
+          ) : value.trim().length > 0 && token ? (
             <FaCircleArrowRight
               onClick={sendMessage}
               className="h-7 w-7 cursor-pointer active:scale-105 transition-transform duration-150 text-gray-900 dark:text-gray-100 hover:text-gray-800 hover:dark:text-gray-300"

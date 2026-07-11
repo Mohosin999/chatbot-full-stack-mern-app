@@ -15,7 +15,7 @@ router
   .post(
     "/api/v1/auth/refresh",
     authenticateRefresh,
-    authController.refreshToken
+    authController.refreshToken,
   );
 
 router
@@ -29,7 +29,12 @@ router
   .patch(authenticate, chatController.updateItem)
   .delete(authenticate, chatController.removeItem);
 
-router.post("/api/v1/messages", authenticate, messageController.create);
+// router.post("/api/v1/messages", authenticate, messageController.create);
+router.post(
+  "/api/v1/messages/stream",
+  authenticate,
+  messageController.streamCreate,
+);
 
 router.get("/api/v1/user", authenticate, userController.getUser);
 

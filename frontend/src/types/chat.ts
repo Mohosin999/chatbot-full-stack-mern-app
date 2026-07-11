@@ -4,6 +4,7 @@ export interface Message {
   content: string;
   isTemp?: boolean;
   isTyping?: boolean;
+  isStreaming?: boolean;
   isImage?: boolean;
   chatName?: string;
 }

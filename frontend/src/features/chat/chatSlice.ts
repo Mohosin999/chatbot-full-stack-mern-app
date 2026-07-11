@@ -1,6 +1,495 @@
+// import api from "@/api/axiosInstance";
+// import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+// import type { ChatState, Message } from "@/types";
+
+// /** ------------------------------------------------------------
+//  * AbortController management for streaming responses - start
+//  -------------------------------------------------------------*/
+// let _abortController: AbortController | null = null;
+
+// export const setAbortController = (controller: AbortController | null) => {
+//   _abortController = controller;
+// };
+
+// export const abortStream = () => {
+//   if (_abortController) {
+//     _abortController.abort();
+//     _abortController = null;
+//   }
+// };
+
+// /** -----------------------------------------------------------
+//  * AbortController management for streaming responses - end
+//  ------------------------------------------------------------*/
+
+// const initialState: ChatState = {
+//   chat: null,
+//   allChats: null,
+//   currentChat: null,
+//   isLoading: false,
+//   error: null,
+//   isGenerating: false,
+//   isDeleting: false,
+//   isCreating: false,
+// };
+
+// export const createChat = createAsyncThunk(
+//   "chat/createChat",
+//   async (userData: Record<string, unknown>, { rejectWithValue }) => {
+//     try {
+//       const accessToken = localStorage.getItem("accessToken");
+//       if (!accessToken)
+//         return rejectWithValue("No authentication accessToken found");
+
+//       const res = await api.post(
+//         `${import.meta.env.VITE_BASE_URL}/chats`,
+//         userData,
+//         {
+//           headers: { Authorization: `Bearer ${accessToken}` },
+//         },
+//       );
+
+//       return res.data;
+//     } catch (error: any) {
+//       return rejectWithValue(
+//         error.response?.data?.message || "Create chat failed",
+//       );
+//     }
+//   },
+// );
+
+// export const getAllChats = createAsyncThunk(
+//   "chat/getAllChats",
+//   async (_, { rejectWithValue }) => {
+//     try {
+//       const accessToken = localStorage.getItem("accessToken");
+//       if (!accessToken)
+//         return rejectWithValue("No authentication accessToken found");
+
+//       const res = await api.get(`${import.meta.env.VITE_BASE_URL}/chats`, {
+//         headers: { Authorization: `Bearer ${accessToken}` },
+//       });
+
+//       return res.data;
+//     } catch (error: any) {
+//       return rejectWithValue(
+//         error.response?.data?.message || "Fetch chats failed",
+//       );
+//     }
+//   },
+// );
+
+// export const getChatById = createAsyncThunk(
+//   "chat/getChatById",
+//   async (chatId: string, { rejectWithValue }) => {
+//     try {
+//       const accessToken = localStorage.getItem("accessToken");
+//       if (!accessToken)
+//         return rejectWithValue("No authentication accessToken found");
+
+//       const res = await api.get(
+//         `${import.meta.env.VITE_BASE_URL}/chats/${chatId}`,
+//         {
+//           headers: { Authorization: `Bearer ${accessToken}` },
+//         },
+//       );
+
+//       return res.data;
+//     } catch (error: any) {
+//       return rejectWithValue(
+//         error.response?.data?.message || "Fetch chat failed",
+//       );
+//     }
+//   },
+// );
+
+// export const deleteChatById = createAsyncThunk(
+//   "chat/deleteChatById",
+//   async (chatId: string, { rejectWithValue }) => {
+//     try {
+//       const accessToken = localStorage.getItem("accessToken");
+//       if (!accessToken)
+//         return rejectWithValue("No authentication accessToken found");
+
+//       await api.delete(`${import.meta.env.VITE_BASE_URL}/chats/${chatId}`, {
+//         headers: { Authorization: `Bearer ${accessToken}` },
+//       });
+
+//       return chatId;
+//     } catch (error: any) {
+//       return rejectWithValue(
+//         error.response?.data?.message || "Delete chat failed",
+//       );
+//     }
+//   },
+// );
+
+// // export const createMessage = createAsyncThunk(
+// //   "chat/createMessage",
+// //   async (
+// //     messageData: { prompt: string; chatId: string },
+// //     { rejectWithValue },
+// //   ) => {
+// //     try {
+// //       const accessToken = localStorage.getItem("accessToken");
+// //       if (!accessToken)
+// //         return rejectWithValue("No authentication accessToken found");
+
+// //       const res = await api.post(
+// //         `${import.meta.env.VITE_BASE_URL}/messages`,
+// //         messageData,
+// //         {
+// //           headers: { Authorization: `Bearer ${accessToken}` },
+// //         },
+// //       );
+
+// //       return res.data;
+// //     } catch (error: any) {
+// //       return rejectWithValue(
+// //         error.response?.data?.message || "Create message failed",
+// //       );
+// //     }
+// //   },
+// // );
+
+// export const createMessageStream = createAsyncThunk(
+//   "chat/createMessageStream",
+//   async (
+//     messageData: { prompt: string; chatId: string },
+//     { dispatch, rejectWithValue },
+//   ) => {
+//     const controller = new AbortController();
+//     _abortController = controller;
+
+//     try {
+//       const accessToken = localStorage.getItem("accessToken");
+//       if (!accessToken) {
+//         _abortController = null;
+//         return rejectWithValue("No authentication accessToken found");
+//       }
+
+//       const response = await fetch(
+//         `${import.meta.env.VITE_BASE_URL}/messages/stream`,
+//         {
+//           method: "POST",
+//           signal: controller.signal,
+//           headers: {
+//             "Content-Type": "application/json",
+//             Authorization: `Bearer ${accessToken}`,
+//           },
+//           body: JSON.stringify(messageData),
+//         },
+//       );
+
+//       if (!response.ok) {
+//         _abortController = null;
+//         const err = await response.json().catch(() => null);
+//         return rejectWithValue(
+//           err?.message || `Stream request failed (${response.status})`,
+//         );
+//       }
+
+//       const reader = response.body!.getReader();
+//       const decoder = new TextDecoder();
+//       let buffer = "";
+
+//       while (true) {
+//         const { done, value } = await reader.read();
+//         if (done) break;
+
+//         buffer += decoder.decode(value, { stream: true });
+
+//         const lines = buffer.split("\n");
+//         buffer = lines.pop() || "";
+
+//         for (const line of lines) {
+//           if (!line.startsWith("data: ")) continue;
+
+//           const data = JSON.parse(line.slice(6));
+
+//           if (data.error) {
+//             _abortController = null;
+//             return rejectWithValue(data.error);
+//           }
+
+//           if (data.done) {
+//             _abortController = null;
+//             dispatch(finalizeAssistantMessage(data.message));
+//             if (data.message?.chatName) {
+//               dispatch(
+//                 updateChatName({
+//                   chatId: messageData.chatId,
+//                   chatName: data.message.chatName,
+//                 }),
+//               );
+//             }
+//             return data.message;
+//           }
+
+//           if (data.chunk) {
+//             dispatch(appendStreamChunk(data.chunk));
+//           }
+//         }
+//       }
+
+//       _abortController = null;
+//       return rejectWithValue("Stream ended without completion event");
+//     } catch (error: any) {
+//       _abortController = null;
+
+//       if (error.name === "AbortError") {
+//         dispatch(finalizeAssistantMessage({}));
+//         return "aborted";
+//       }
+
+//       return rejectWithValue(error.message || "Stream request failed");
+//     }
+//   },
+// );
+
+// export const createImage = createAsyncThunk(
+//   "chat/createImage",
+//   async (
+//     imageData: { prompt: string; chatId: string },
+//     { rejectWithValue },
+//   ) => {
+//     try {
+//       const accessToken = localStorage.getItem("accessToken");
+//       if (!accessToken)
+//         return rejectWithValue("No authentication accessToken found");
+
+//       const res = await api.post(
+//         `${import.meta.env.VITE_BASE_URL}/images`,
+//         imageData,
+//         {
+//           headers: { Authorization: `Bearer ${accessToken}` },
+//         },
+//       );
+
+//       return res.data;
+//     } catch (error: any) {
+//       return rejectWithValue(
+//         error.response?.data?.message || "Create image failed",
+//       );
+//     }
+//   },
+// );
+
+// const chatSlice = createSlice({
+//   name: "chat",
+//   initialState,
+//   reducers: {
+//     updateChatName: (state, action) => {
+//       const { chatId, chatName } = action.payload as {
+//         chatId: string;
+//         chatName: string;
+//       };
+
+//       if (state.currentChat?.data?.id === chatId) {
+//         state.currentChat.data.name = chatName;
+//       }
+
+//       const index = state.allChats?.data?.findIndex(
+//         (chat) => chat.id === chatId,
+//       );
+//       if (index !== undefined && index !== -1 && state.allChats?.data) {
+//         state.allChats.data[index].name = chatName;
+//       }
+//     },
+
+//     addChatToAllChats: (state, action) => {
+//       state.allChats = state.allChats
+//         ? { ...state.allChats, data: [action.payload, ...state.allChats.data] }
+//         : { status: true, message: "", data: [action.payload] };
+//     },
+
+//     addTempMessage: (state, action) => {
+//       if (!state.currentChat?.data?.messages)
+//         state.currentChat!.data.messages = [];
+//       state.currentChat!.data.messages.push(action.payload);
+//     },
+
+//     replaceTempMessage: (state, action) => {
+//       if (!state.currentChat?.data?.messages) return;
+//       const index = state.currentChat.data.messages.findIndex(
+//         (msg) => (msg as Message).isTemp === true && msg.role === "assistant",
+//       );
+//       if (index !== -1) {
+//         state.currentChat.data.messages[index] = action.payload;
+//       }
+//     },
+
+//     appendStreamChunk: (state, action) => {
+//       if (!state.currentChat?.data?.messages) return;
+//       const lastAssistant = [...state.currentChat.data.messages]
+//         .reverse()
+//         .find(
+//           (msg) =>
+//             (msg as Message).isStreaming === true && msg.role === "assistant",
+//         );
+//       if (lastAssistant) {
+//         lastAssistant.content += action.payload as string;
+//       }
+//     },
+
+//     finalizeAssistantMessage: (state, action) => {
+//       if (!state.currentChat?.data?.messages) return;
+//       const index = state.currentChat.data.messages.findIndex(
+//         (msg) =>
+//           (msg as Message).isStreaming === true && msg.role === "assistant",
+//       );
+//       if (index !== -1) {
+//         const existing = state.currentChat.data.messages[index] as Message;
+//         state.currentChat.data.messages[index] = {
+//           ...existing,
+//           ...(action.payload as Partial<Message>),
+//           isStreaming: false,
+//           isTemp: false,
+//         };
+//       }
+//     },
+//   },
+
+//   extraReducers: (builder) => {
+//     builder
+//       .addCase(createChat.pending, (state) => {
+//         state.isCreating = true;
+//         state.error = null;
+//       })
+//       .addCase(createChat.fulfilled, (state, action) => {
+//         state.isCreating = false;
+//         state.chat = action.payload;
+//         state.error = null;
+//       })
+//       .addCase(createChat.rejected, (state, action) => {
+//         state.isCreating = false;
+//         state.error = action.payload as string;
+//       })
+//       .addCase(getAllChats.pending, (state) => {
+//         state.isLoading = true;
+//         state.error = null;
+//       })
+//       .addCase(getAllChats.fulfilled, (state, action) => {
+//         state.isLoading = false;
+//         state.allChats = action.payload;
+//         state.error = null;
+//       })
+//       .addCase(getAllChats.rejected, (state, action) => {
+//         state.isLoading = false;
+//         state.error = action.payload as string;
+//       })
+//       .addCase(getChatById.pending, (state) => {
+//         state.isLoading = true;
+//         state.error = null;
+//       })
+//       .addCase(getChatById.fulfilled, (state, action) => {
+//         state.isLoading = false;
+//         state.currentChat = action.payload;
+//         state.error = null;
+//       })
+//       .addCase(getChatById.rejected, (state, action) => {
+//         state.isLoading = false;
+//         state.error = action.payload as string;
+//       })
+//       .addCase(deleteChatById.pending, (state) => {
+//         state.isDeleting = true;
+//         state.error = null;
+//       })
+//       .addCase(deleteChatById.fulfilled, (state, action) => {
+//         state.isDeleting = false;
+//         state.currentChat = null;
+//         state.chat = null;
+//         if (state.allChats?.data) {
+//           state.allChats.data = state.allChats.data.filter(
+//             (c) => c.id !== (action.payload as string),
+//           );
+//         }
+//         state.error = null;
+//       })
+//       .addCase(deleteChatById.rejected, (state, action) => {
+//         state.isDeleting = false;
+//         state.error = action.payload as string;
+//       })
+//       // .addCase(createMessage.pending, (state) => {
+//       //   state.isGenerating = true;
+//       //   state.error = null;
+//       // })
+//       // .addCase(createMessage.fulfilled, (state) => {
+//       //   state.isGenerating = false;
+//       //   state.error = null;
+//       // })
+//       // .addCase(createMessage.rejected, (state, action) => {
+//       //   state.isGenerating = false;
+//       //   state.error = action.payload as string;
+//       // })
+//       // createMessageStream
+//       .addCase(createMessageStream.pending, (state) => {
+//         state.isGenerating = true;
+//         state.error = null;
+//       })
+//       .addCase(createMessageStream.fulfilled, (state) => {
+//         state.isGenerating = false;
+//         state.error = null;
+//       })
+//       .addCase(createMessageStream.rejected, (state, action) => {
+//         state.isGenerating = false;
+//         state.error = action.payload as string;
+//       })
+//       .addCase(createImage.pending, (state) => {
+//         state.isGenerating = true;
+//         state.error = null;
+//       })
+//       .addCase(createImage.fulfilled, (state, action) => {
+//         state.isGenerating = false;
+//         if (!state.currentChat?.data?.messages)
+//           state.currentChat!.data.messages = [];
+//         state.currentChat!.data.messages.push(action.payload);
+//         state.error = null;
+//       })
+//       .addCase(createImage.rejected, (state, action) => {
+//         state.isGenerating = false;
+//         state.error = action.payload as string;
+//       });
+//   },
+// });
+
+// export const {
+//   updateChatName,
+//   addChatToAllChats,
+//   addTempMessage,
+//   replaceTempMessage,
+//   appendStreamChunk,
+//   finalizeAssistantMessage,
+// } = chatSlice.actions;
+
+// export default chatSlice.reducer;
+
 import api from "@/api/axiosInstance";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import type { ChatState, Message } from "@/types";
+
+/** ---------------------------------------------------------------
+ * ABORT CONTROLLER MANAGEMENT
+ * Manages abort controller for canceling streaming API requests
+ * when user navigates away or stops generation.
+ ----------------------------------------------------------------*/
+
+let _abortController: AbortController | null = null;
+
+// export const setAbortController = (controller: AbortController | null) => {
+//   _abortController = controller;
+// };
+
+export const abortStream = () => {
+  if (_abortController) {
+    _abortController.abort();
+    _abortController = null;
+  }
+};
+
+/** ---------------------------------------------------------------
+ * INITIAL STATE CONFIGURATION
+ ----------------------------------------------------------------*/
 
 const initialState: ChatState = {
   chat: null,
@@ -12,6 +501,10 @@ const initialState: ChatState = {
   isDeleting: false,
   isCreating: false,
 };
+
+/** ---------------------------------------------------------------
+ * ASYNC THUNKS
+ ----------------------------------------------------------------*/
 
 export const createChat = createAsyncThunk(
   "chat/createChat",
@@ -26,16 +519,16 @@ export const createChat = createAsyncThunk(
         userData,
         {
           headers: { Authorization: `Bearer ${accessToken}` },
-        }
+        },
       );
 
       return res.data;
     } catch (error: any) {
       return rejectWithValue(
-        error.response?.data?.message || "Create chat failed"
+        error.response?.data?.message || "Create chat failed",
       );
     }
-  }
+  },
 );
 
 export const getAllChats = createAsyncThunk(
@@ -53,10 +546,10 @@ export const getAllChats = createAsyncThunk(
       return res.data;
     } catch (error: any) {
       return rejectWithValue(
-        error.response?.data?.message || "Fetch chats failed"
+        error.response?.data?.message || "Fetch chats failed",
       );
     }
-  }
+  },
 );
 
 export const getChatById = createAsyncThunk(
@@ -71,16 +564,16 @@ export const getChatById = createAsyncThunk(
         `${import.meta.env.VITE_BASE_URL}/chats/${chatId}`,
         {
           headers: { Authorization: `Bearer ${accessToken}` },
-        }
+        },
       );
 
       return res.data;
     } catch (error: any) {
       return rejectWithValue(
-        error.response?.data?.message || "Fetch chat failed"
+        error.response?.data?.message || "Fetch chat failed",
       );
     }
-  }
+  },
 );
 
 export const deleteChatById = createAsyncThunk(
@@ -98,76 +591,174 @@ export const deleteChatById = createAsyncThunk(
       return chatId;
     } catch (error: any) {
       return rejectWithValue(
-        error.response?.data?.message || "Delete chat failed"
+        error.response?.data?.message || "Delete chat failed",
       );
     }
-  }
+  },
 );
 
-export const createMessage = createAsyncThunk(
-  "chat/createMessage",
-  async (messageData: { prompt: string; chatId: string }, { rejectWithValue }) => {
+export const createMessageStream = createAsyncThunk(
+  "chat/createMessageStream",
+  async (
+    messageData: { prompt: string; chatId: string },
+    { dispatch, rejectWithValue },
+  ) => {
+    // Initialize abort controller for stream cancellation
+    const controller = new AbortController();
+    _abortController = controller;
+
     try {
       const accessToken = localStorage.getItem("accessToken");
-      if (!accessToken)
+      if (!accessToken) {
+        _abortController = null;
         return rejectWithValue("No authentication accessToken found");
+      }
 
-      const res = await api.post(
-        `${import.meta.env.VITE_BASE_URL}/messages`,
-        messageData,
+      // Establish streaming connection using fetch API with SSE
+      const response = await fetch(
+        `${import.meta.env.VITE_BASE_URL}/messages/stream`,
         {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        }
+          method: "POST",
+          signal: controller.signal,
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify(messageData),
+        },
       );
 
-      return res.data;
+      // Handle HTTP errors from the stream endpoint
+      if (!response.ok) {
+        _abortController = null;
+        const err = await response.json().catch(() => null);
+        return rejectWithValue(
+          err?.message || `Stream request failed (${response.status})`,
+        );
+      }
+
+      // Initialize stream reader for processing chunks
+      const reader = response.body!.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      // Process streaming response chunks in a loop
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break; // Stream completed
+
+        buffer += decoder.decode(value, { stream: true });
+
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+
+        // Process each complete SSE line
+        for (const line of lines) {
+          if (!line.startsWith("data: ")) continue;
+
+          const data = JSON.parse(line.slice(6));
+
+          if (data.error) {
+            _abortController = null;
+            return rejectWithValue(data.error);
+          }
+
+          if (data.done) {
+            _abortController = null;
+            dispatch(finalizeAssistantMessage(data.message));
+            // Update chat name if server provided a new one
+            if (data.message?.chatName) {
+              dispatch(
+                updateChatName({
+                  chatId: messageData.chatId,
+                  chatName: data.message.chatName,
+                }),
+              );
+            }
+            return data.message;
+          }
+
+          // Handle content chunk - append to assistant message in real-time
+          if (data.chunk) {
+            dispatch(appendStreamChunk(data.chunk));
+          }
+        }
+      }
+
+      // Stream ended without proper completion event
+      _abortController = null;
+      return rejectWithValue("Stream ended without completion event");
     } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data?.message || "Create message failed"
-      );
+      _abortController = null;
+
+      // Handle user-initiated abort
+      if (error.name === "AbortError") {
+        dispatch(finalizeAssistantMessage({}));
+        return "aborted";
+      }
+
+      // Handle other network/stream errors
+      return rejectWithValue(error.message || "Stream request failed");
     }
-  }
+  },
 );
 
 export const createImage = createAsyncThunk(
   "chat/createImage",
-  async (imageData: { prompt: string; chatId: string }, { rejectWithValue }) => {
+  async (
+    imageData: { prompt: string; chatId: string },
+    { rejectWithValue },
+  ) => {
     try {
+      // Retrieve authentication token from local storage
       const accessToken = localStorage.getItem("accessToken");
       if (!accessToken)
         return rejectWithValue("No authentication accessToken found");
 
+      // Make POST request to generate image
       const res = await api.post(
         `${import.meta.env.VITE_BASE_URL}/images`,
         imageData,
         {
           headers: { Authorization: `Bearer ${accessToken}` },
-        }
+        },
       );
 
       return res.data;
     } catch (error: any) {
       return rejectWithValue(
-        error.response?.data?.message || "Create image failed"
+        error.response?.data?.message || "Create image failed",
       );
     }
-  }
+  },
 );
+
+/** ---------------------------------------------------------------
+ * CHAT SLICE - REDUX STATE MANAGEMENT
+ ----------------------------------------------------------------*/
 
 const chatSlice = createSlice({
   name: "chat",
   initialState,
+
+  // =========================
+  // REDUCERS
+  // =========================
   reducers: {
     updateChatName: (state, action) => {
-      const { chatId, chatName } = action.payload as { chatId: string; chatName: string };
+      const { chatId, chatName } = action.payload as {
+        chatId: string;
+        chatName: string;
+      };
 
       if (state.currentChat?.data?.id === chatId) {
         state.currentChat.data.name = chatName;
       }
 
       const index = state.allChats?.data?.findIndex(
-        (chat) => chat.id === chatId
+        (chat) => chat.id === chatId,
       );
+
       if (index !== undefined && index !== -1 && state.allChats?.data) {
         state.allChats.data[index].name = chatName;
       }
@@ -180,24 +771,70 @@ const chatSlice = createSlice({
     },
 
     addTempMessage: (state, action) => {
-      if (!state.currentChat?.data?.messages)
-        state.currentChat!.data.messages = [];
-      state.currentChat!.data.messages.push(action.payload);
+      const chatData = state.currentChat?.data;
+
+      // If no messages array exists yet, create one
+      if (!chatData?.messages) {
+        chatData!.messages = [];
+      }
+      // Add the new message to the list
+      chatData!.messages.push(action.payload);
     },
 
-    replaceTempMessage: (state, action) => {
+    // replaceTempMessage: (state, action) => {
+    //   if (!state.currentChat?.data?.messages) return;
+    //   const index = state.currentChat.data.messages.findIndex(
+    //     (msg) => (msg as Message).isTemp === true && msg.role === "assistant",
+    //   );
+    //   if (index !== -1) {
+    //     state.currentChat.data.messages[index] = action.payload;
+    //   }
+    // },
+
+    appendStreamChunk: (state, action) => {
       if (!state.currentChat?.data?.messages) return;
+
+      // Find the last streaming assistant message
+      const lastAssistant = [...state.currentChat.data.messages]
+        .reverse()
+        .find(
+          (msg) =>
+            (msg as Message).isStreaming === true && msg.role === "assistant",
+        );
+
+      if (lastAssistant) {
+        lastAssistant.content += action.payload as string;
+      }
+    },
+
+    finalizeAssistantMessage: (state, action) => {
+      if (!state.currentChat?.data?.messages) return;
+
       const index = state.currentChat.data.messages.findIndex(
-        (msg) => (msg as Message).isTemp === true && msg.role === "assistant"
+        (msg) =>
+          (msg as Message).isStreaming === true && msg.role === "assistant",
       );
+
       if (index !== -1) {
-        state.currentChat.data.messages[index] = action.payload;
+        const existing = state.currentChat.data.messages[index] as Message;
+        // Merge existing with final data and clear streaming flags
+        state.currentChat.data.messages[index] = {
+          ...existing,
+          ...(action.payload as Partial<Message>),
+          isStreaming: false,
+          isTemp: false,
+        };
       }
     },
   },
 
+  // =========================
+  // EXTRA REDUCERS
+  // =========================
+
   extraReducers: (builder) => {
     builder
+      // ---------- CREATE CHAT LIFECYCLE ----------
       .addCase(createChat.pending, (state) => {
         state.isCreating = true;
         state.error = null;
@@ -211,6 +848,8 @@ const chatSlice = createSlice({
         state.isCreating = false;
         state.error = action.payload as string;
       })
+
+      // ---------- GET ALL CHATS LIFECYCLE ----------
       .addCase(getAllChats.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -224,6 +863,8 @@ const chatSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload as string;
       })
+
+      // ---------- GET CHAT BY ID LIFECYCLE ----------
       .addCase(getChatById.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -237,6 +878,8 @@ const chatSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload as string;
       })
+
+      // ---------- DELETE CHAT BY ID LIFECYCLE ----------
       .addCase(deleteChatById.pending, (state) => {
         state.isDeleting = true;
         state.error = null;
@@ -245,9 +888,10 @@ const chatSlice = createSlice({
         state.isDeleting = false;
         state.currentChat = null;
         state.chat = null;
+        // Remove deleted chat from allChats list
         if (state.allChats?.data) {
           state.allChats.data = state.allChats.data.filter(
-            (c) => c.id !== (action.payload as string)
+            (c) => c.id !== (action.payload as string),
           );
         }
         state.error = null;
@@ -256,24 +900,43 @@ const chatSlice = createSlice({
         state.isDeleting = false;
         state.error = action.payload as string;
       })
-      .addCase(createMessage.pending, (state) => {
+
+      // ---------- COMMENTED OUT: CREATE MESSAGE LIFECYCLE ----------
+      // .addCase(createMessage.pending, (state) => {
+      //   state.isGenerating = true;
+      //   state.error = null;
+      // })
+      // .addCase(createMessage.fulfilled, (state) => {
+      //   state.isGenerating = false;
+      //   state.error = null;
+      // })
+      // .addCase(createMessage.rejected, (state, action) => {
+      //   state.isGenerating = false;
+      //   state.error = action.payload as string;
+      // })
+
+      // ---------- CREATE MESSAGE STREAM LIFECYCLE ----------
+      .addCase(createMessageStream.pending, (state) => {
         state.isGenerating = true;
         state.error = null;
       })
-      .addCase(createMessage.fulfilled, (state) => {
+      .addCase(createMessageStream.fulfilled, (state) => {
         state.isGenerating = false;
         state.error = null;
       })
-      .addCase(createMessage.rejected, (state, action) => {
+      .addCase(createMessageStream.rejected, (state, action) => {
         state.isGenerating = false;
         state.error = action.payload as string;
       })
+
+      // ---------- CREATE IMAGE LIFECYCLE ----------
       .addCase(createImage.pending, (state) => {
         state.isGenerating = true;
         state.error = null;
       })
       .addCase(createImage.fulfilled, (state, action) => {
         state.isGenerating = false;
+        // Add generated image to current chat messages
         if (!state.currentChat?.data?.messages)
           state.currentChat!.data.messages = [];
         state.currentChat!.data.messages.push(action.payload);
@@ -286,11 +949,15 @@ const chatSlice = createSlice({
   },
 });
 
+// Export all synchronous actions for use in components
 export const {
   updateChatName,
   addChatToAllChats,
   addTempMessage,
-  replaceTempMessage,
+  // replaceTempMessage,
+  appendStreamChunk,
+  finalizeAssistantMessage,
 } = chatSlice.actions;
 
+// Export the reducer for store configuration
 export default chatSlice.reducer;
