@@ -11,11 +11,11 @@ export interface IBudgetConfig {
 
 const DEFAULT_CONFIG: IBudgetConfig = {
   totalTokens: 128_000,
-  systemPercent: 10,
+  systemPercent: 5,
   memoryPercent: 5,
-  historyPercent: 35,
-  toolPercent: 10,
-  reservedPercent: 25,
+  historyPercent: 45,
+  toolPercent: 15,
+  reservedPercent: 30,
 };
 
 export class ContextBudget {

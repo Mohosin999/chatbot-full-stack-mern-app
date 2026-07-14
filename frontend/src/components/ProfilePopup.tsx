@@ -1,9 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useDispatch } from "react-redux";
 import { useAppSelector } from "@/hooks/useAppStore";
 import { updateCustomInstructions } from "@/features/user/userSlice";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import toast from "react-hot-toast";
+
+const SYSTEM_PROMPT_MAX_TOKENS = 6_400;
+
+function estimateTokens(text: string): number {
+  if (!text) return 0;
+  return Math.ceil(text.length / 4);
+}
 
 interface ProfilePopupProps {
   open: boolean;
@@ -21,6 +28,9 @@ const ProfilePopup = ({ open, onOpenChange }: ProfilePopupProps) => {
       setInstructions(profile?.customInstructions || "");
     }
   }, [open, profile?.customInstructions]);
+
+  const tokenCount = useMemo(() => estimateTokens(instructions), [instructions]);
+  const overLimit = tokenCount > SYSTEM_PROMPT_MAX_TOKENS;
 
   const handleSave = async () => {
     const res = await dispatch(updateCustomInstructions(instructions) as any);
@@ -69,7 +79,7 @@ const ProfilePopup = ({ open, onOpenChange }: ProfilePopupProps) => {
           {activeTab === "personalize" && (
             <div className="space-y-3">
               <div>
-                <label className="block text-sm font-medium mb-1">AI Custom Instructions</label>
+                <label className="block text-sm font-medium mb-1">Instructions for chatbot</label>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
                   These instructions will be included in every prompt you send to the AI.
                 </p>
@@ -80,6 +90,12 @@ const ProfilePopup = ({ open, onOpenChange }: ProfilePopupProps) => {
                   rows={6}
                   className="w-full border border-gray-300 dark:border-gray-600 rounded-lg p-3 text-sm bg-transparent resize-none focus:outline-none focus:ring-2 focus:ring-[#48A4FF]"
                 />
+                <div className="flex items-center justify-between mt-1">
+                  <span className={`text-xs ${overLimit ? "text-red-500 font-medium" : tokenCount > SYSTEM_PROMPT_MAX_TOKENS * 0.8 ? "text-yellow-500" : "text-gray-400"}`}>
+                    {tokenCount.toLocaleString()} / {SYSTEM_PROMPT_MAX_TOKENS.toLocaleString()} tokens
+                    {overLimit && ` — exceeds limit by ${(tokenCount - SYSTEM_PROMPT_MAX_TOKENS).toLocaleString()} tokens`}
+                  </span>
+                </div>
               </div>
               <div className="flex justify-end gap-2">
                 <button
@@ -90,7 +106,7 @@ const ProfilePopup = ({ open, onOpenChange }: ProfilePopupProps) => {
                 </button>
                 <button
                   onClick={handleSave}
-                  disabled={updating}
+                  disabled={updating || overLimit}
                   className="px-4 py-2 text-sm rounded-lg bg-[#48A4FF] text-white hover:bg-[#3a8ee8] disabled:opacity-50 cursor-pointer"
                 >
                   {updating ? "Saving..." : "Save"}
