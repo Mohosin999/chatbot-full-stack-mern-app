@@ -14,6 +14,7 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
+import ProfilePopup from "@/components/ProfilePopup";
 import { IoMdLogIn } from "react-icons/io";
 import { BarChart3, LogOut } from "lucide-react";
 import { Switch } from "../ui/switch";
@@ -27,6 +28,7 @@ interface SidebarFooterProps {
 
 const SidebarFooter = ({ token, onLogout, onLogin, onOpenContext }: SidebarFooterProps) => {
   const [alertOpen, setAlertOpen] = useState(false);
+  const [profilePopupOpen, setProfilePopupOpen] = useState(false);
   const dispatch = useDispatch();
 
   const { profile, loading } = useAppSelector((state) => state.user);
@@ -88,9 +90,12 @@ const SidebarFooter = ({ token, onLogout, onLogin, onOpenContext }: SidebarFoote
               </AvatarFallback>
             </Avatar>
             <div className="flex flex-col">
-              <h2 className="text-sm font-medium text-white">
+              <button
+                onClick={() => setProfilePopupOpen(true)}
+                className="text-sm font-medium text-white text-start hover:text-[#48A4FF] transition-colors cursor-pointer"
+              >
                 {loading ? "Loading..." : profile?.name || "User"}
-              </h2>
+              </button>
 
               <AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
                 <AlertDialogTrigger asChild>
@@ -144,6 +149,8 @@ const SidebarFooter = ({ token, onLogout, onLogin, onOpenContext }: SidebarFoote
           <IoMdLogIn className="mr-1" /> Login
         </Button>
       )}
+
+      <ProfilePopup open={profilePopupOpen} onOpenChange={setProfilePopupOpen} />
     </div>
   );
 };

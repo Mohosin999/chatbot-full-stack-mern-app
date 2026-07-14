@@ -6,6 +6,7 @@ export interface IUser {
   password?: string | null;
   refreshToken?: string | null;
   refreshTokenExpiresAt?: Date | null;
+  customInstructions?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -18,10 +19,12 @@ export interface IUserDoc {
   password?: string | null;
   refreshToken?: string | null;
   refreshTokenExpiresAt?: Date | null;
+  customInstructions?: string;
 }
 
 export interface IUserWithoutPassword {
   id: string;
   name: string;
   email: string;
+  customInstructions?: string;
 }

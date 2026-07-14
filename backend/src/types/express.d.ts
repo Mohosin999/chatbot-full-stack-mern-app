@@ -10,6 +10,7 @@ declare global {
         password?: string;
         refreshToken?: string | null;
         refreshTokenExpiresAt?: Date | null;
+        customInstructions?: string;
         createdAt?: Date;
         updatedAt?: Date;
       };

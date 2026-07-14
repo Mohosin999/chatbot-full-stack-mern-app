@@ -6,9 +6,12 @@ import Message from "./Message";
 import {
   createChat,
   createMessageStream,
+  editMessageStream,
   getChatById,
   addChatToAllChats,
   addTempMessage,
+  updateMessageContent,
+  removeMessagesAfter,
   abortStream,
 } from "@/features/chat/chatSlice";
 import { useAppSelector } from "@/hooks/useAppStore";
@@ -141,6 +144,28 @@ const ContentArea = () => {
     chatInputRef.current?.focus();
   };
 
+  const handleEdit = async (messageId: string | number, newContent: string) => {
+    const chatId = currentChat?.data?.id;
+    if (!chatId) return;
+
+    dispatch(updateMessageContent({ messageId, content: newContent }));
+    dispatch(removeMessagesAfter({ messageId }));
+
+    dispatch(
+      addTempMessage({
+        id: "streaming-msg",
+        role: "assistant",
+        content: "",
+        isStreaming: true,
+        isTemp: true,
+      }),
+    );
+
+    dispatch(
+      editMessageStream({ chatId, messageId, prompt: newContent }) as any,
+    );
+  };
+
   return (
     <div className="h-screen bg-[#f5ebeb] dark:bg-[#212121] pb-6 pt-16 lg:pt-6 flex flex-col relative">
       <div
@@ -167,7 +192,7 @@ const ContentArea = () => {
               return (
                 <div className="flex flex-col space-y-2 w-full md:max-w-2xl xl:max-w-3xl mx-auto mt-4 relative">
                   {messages!.map((msg) => (
-                    <Message key={msg.id} msg={msg} />
+                    <Message key={msg.id} msg={msg} onEdit={isGenerating ? undefined : handleEdit} />
                   ))}
                   <div ref={messagesEndRef} />
                   {showScrollButton && (

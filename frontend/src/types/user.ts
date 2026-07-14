@@ -3,6 +3,7 @@ export interface UserProfile {
   name: string;
   email: string;
   avatar?: string;
+  customInstructions?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -10,5 +11,6 @@ export interface UserProfile {
 export interface UserState {
   profile: UserProfile | null;
   loading: boolean;
+  updating: boolean;
   error: string | null;
 }

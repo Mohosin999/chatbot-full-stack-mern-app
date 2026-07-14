@@ -1,3 +1,4 @@
 import streamCreate from "./streamCreate";
+import streamEdit from "./streamEdit";
 
-export { streamCreate };
+export { streamCreate, streamEdit };

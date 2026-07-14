@@ -6,6 +6,7 @@ export interface IUserDocument extends Document {
   password?: string | null;
   refreshToken?: string | null;
   refreshTokenExpiresAt?: Date | null;
+  customInstructions?: string;
 }
 
 const userSchema = new Schema<IUserDocument>(
@@ -28,6 +29,7 @@ const userSchema = new Schema<IUserDocument>(
     },
     refreshToken: { type: String, default: null },
     refreshTokenExpiresAt: { type: Date, default: null },
+    customInstructions: { type: String, default: "" },
   },
   { timestamps: true, id: true }
 );

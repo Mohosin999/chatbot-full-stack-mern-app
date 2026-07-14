@@ -1,73 +1,72 @@
-// import React, { useEffect } from "react";
-// import Markdown from "react-markdown";
-// import Prism from "prismjs";
-// import TypingIndicator from "./ui/typing-indicator";
-// import type { Message as MessageType } from "@/types";
-
-// interface MessageProps {
-//   msg: MessageType;
-// }
-
-// const Message = ({ msg }: MessageProps) => {
-//   useEffect(() => {
-//     Prism.highlightAll();
-//   }, [msg.content]);
-
-//   if (msg.isTyping) {
-//     return (
-//       <div className="flex justify-start">
-//         <div className="lg:p-3 rounded-lg rounded-bl-none">
-//           <TypingIndicator />
-//         </div>
-//       </div>
-//     );
-//   }
-
-//   return (
-//     <div
-//       className={`flex ${
-//         msg.role === "user" ? "justify-end" : "justify-start"
-//       }`}
-//     >
-//       <div
-//         className={`rounded-lg lg:max-w-[90%] ${
-//           msg.role === "user"
-//             ? "bg-gray-300 dark:bg-[#303030] text-gray-900 dark:text-gray-200 rounded-br-none px-3"
-//             : "lg:p-3"
-//         }`}
-//       >
-//         {msg.isStreaming && !msg.content ? (
-//           <span className="flex space-x-1">
-//             <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
-//             <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:150ms]" />
-//             <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:300ms]" />
-//           </span>
-//         ) : (
-//           <div className="text-base reset-tw">
-//             <Markdown>{msg.content}</Markdown>
-//           </div>
-//         )}
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default Message;
-
-import React, { useEffect } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Markdown from "react-markdown";
 import Prism from "prismjs";
+import { Pencil, Send, X } from "lucide-react";
 import TypingIndicator from "./ui/typing-indicator";
 import type { Message as MessageType } from "@/types";
 
 interface MessageProps {
   msg: MessageType;
+  onEdit?: (messageId: string | number, newContent: string) => void;
 }
 
-const Message = ({ msg }: MessageProps) => {
+const Message = ({ msg, onEdit }: MessageProps) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editText, setEditText] = useState(msg.content);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
   useEffect(() => {
     Prism.highlightAll();
   }, [msg.content]);
+
+  useEffect(() => {
+    if (isEditing && textareaRef.current) {
+      textareaRef.current.focus();
+      textareaRef.current.setSelectionRange(
+        textareaRef.current.value.length,
+        textareaRef.current.value.length,
+      );
+    }
+  }, [isEditing]);
+
+  useEffect(() => {
+    if (!isEditing) {
+      setEditText(msg.content);
+    }
+  }, [msg.content, isEditing]);
+
+  const adjustHeight = () => {
+    const ta = textareaRef.current;
+    if (!ta) return;
+    ta.style.height = "auto";
+    ta.style.height = Math.min(ta.scrollHeight, 200) + "px";
+  };
+
+  useEffect(() => {
+    if (isEditing) adjustHeight();
+  }, [isEditing, editText]);
+
+  const handleSave = () => {
+    if (editText.trim() && editText !== msg.content && onEdit) {
+      onEdit(msg.id, editText.trim());
+    }
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setEditText(msg.content);
+    setIsEditing(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSave();
+    }
+    if (e.key === "Escape") {
+      handleCancel();
+    }
+  };
 
   if (msg.isTyping) {
     return (
@@ -79,25 +78,60 @@ const Message = ({ msg }: MessageProps) => {
     );
   }
 
+  const showEditButton = msg.role === "user" && onEdit && !isEditing && !msg.isStreaming;
+
   return (
     <div
       className={`flex ${
-        msg.role === "user" ? "justify-end" : "justify-start"
+        msg.role === "user" ? "justify-end group" : "justify-start"
       }`}
     >
       <div
-        className={`rounded-lg max-w-[90%] ${
+        className={`relative max-w-[85%] md:max-w-[75%] ${
           msg.role === "user"
-            ? "bg-gray-300 dark:bg-[#303030] text-gray-900 dark:text-gray-200 rounded-br-none px-3"
-            : "lg:p-3"
+            ? isEditing
+              ? "bg-gray-200 dark:bg-[#3a3a3a] rounded-2xl w-full md:max-w-2xl"
+              : "bg-gray-300 dark:bg-[#303030] rounded-2xl rounded-br-sm px-4 py-2.5"
+            : "w-full"
         }`}
       >
         {msg.isStreaming && !msg.content ? (
-          <span className="flex space-x-1">
+          <span className="flex space-x-1 px-1">
             <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
             <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:150ms]" />
             <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:300ms]" />
           </span>
+        ) : isEditing ? (
+          <div className="flex flex-col gap-2 p-1">
+            <textarea
+              ref={textareaRef}
+              value={editText}
+              onChange={(e) => {
+                setEditText(e.target.value);
+                adjustHeight();
+              }}
+              onKeyDown={handleKeyDown}
+              className="w-full resize-none overflow-hidden rounded-xl bg-white dark:bg-[#1a1a1a] text-gray-900 dark:text-gray-100 p-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-shadow"
+              rows={1}
+            />
+            <div className="flex items-center justify-end gap-1.5">
+              <button
+                onClick={handleCancel}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-gray-500 dark:text-gray-400 hover:bg-gray-400/30 dark:hover:bg-gray-600/50 transition-all active:scale-95"
+              >
+                <X size={14} />
+                Cancel
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={!editText.trim()}
+                className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-95 shadow-sm"
+              >
+                Send
+                <Send size={14} />
+              </button>
+            </div>
+          </div>
         ) : (
           <div>
             {msg.files && msg.files.length > 0 && (
@@ -119,9 +153,22 @@ const Message = ({ msg }: MessageProps) => {
                 )}
               </div>
             )}
-            <div className="text-base reset-tw">
+            <div className="text-base reset-tw text-gray-900 dark:text-gray-200 leading-relaxed">
               <Markdown>{msg.content}</Markdown>
             </div>
+
+            {showEditButton && (
+              <button
+                onClick={() => {
+                  setEditText(msg.content);
+                  setIsEditing(true);
+                }}
+                className="mt-1.5 flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:text-blue-500 dark:hover:text-blue-400"
+              >
+                <Pencil size={12} />
+                Edit
+              </button>
+            )}
           </div>
         )}
       </div>

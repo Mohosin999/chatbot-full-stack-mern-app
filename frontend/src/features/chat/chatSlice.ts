@@ -236,6 +236,101 @@ export const createMessageStream = createAsyncThunk(
   },
 );
 
+export const editMessageStream = createAsyncThunk(
+  "chat/editMessageStream",
+  async (
+    { chatId, messageId, prompt }: { chatId: string; messageId: string | number; prompt: string },
+    { dispatch, rejectWithValue },
+  ) => {
+    const controller = new AbortController();
+    _abortController = controller;
+
+    try {
+      const accessToken = localStorage.getItem("accessToken");
+      if (!accessToken) {
+        _abortController = null;
+        return rejectWithValue("No authentication accessToken found");
+      }
+
+      const response = await fetch(
+        `${import.meta.env.VITE_BASE_URL}/messages/stream/edit`,
+        {
+          method: "POST",
+          signal: controller.signal,
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({ chatId, messageId, prompt }),
+        },
+      );
+
+      if (!response.ok) {
+        _abortController = null;
+        const err = await response.json().catch(() => null);
+        return rejectWithValue(
+          err?.message || `Stream request failed (${response.status})`,
+        );
+      }
+
+      const reader = response.body!.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          if (!line.startsWith("data: ")) continue;
+
+          const data = JSON.parse(line.slice(6));
+
+          if (data.error) {
+            _abortController = null;
+            return rejectWithValue(data.error);
+          }
+
+          if (data.done) {
+            _abortController = null;
+            dispatch(finalizeAssistantMessage(data.message));
+            if (data.message?.chatName) {
+              dispatch(
+                updateChatName({
+                  chatId,
+                  chatName: data.message.chatName,
+                }),
+              );
+            }
+            return data.message;
+          }
+
+          if (data.chunk) {
+            dispatch(appendStreamChunk(data.chunk));
+          }
+        }
+      }
+
+      _abortController = null;
+      return rejectWithValue("Stream ended without completion event");
+    } catch (error: any) {
+      _abortController = null;
+
+      if (error.name === "AbortError") {
+        dispatch(finalizeAssistantMessage({}));
+        return "aborted";
+      }
+
+      return rejectWithValue(error.message || "Stream request failed");
+    }
+  },
+);
+
 export const createImage = createAsyncThunk(
   "chat/createImage",
   async (
@@ -314,6 +409,28 @@ const chatSlice = createSlice({
       chatData!.messages.push(action.payload);
     },
 
+    updateMessageContent: (state, action) => {
+      const { messageId, content } = action.payload as { messageId: string | number; content: string };
+      if (!state.currentChat?.data?.messages) return;
+      const msg = state.currentChat.data.messages.find(
+        (m) => m.id === messageId,
+      );
+      if (msg) {
+        msg.content = content;
+      }
+    },
+
+    removeMessagesAfter: (state, action) => {
+      const { messageId } = action.payload as { messageId: string | number };
+      if (!state.currentChat?.data?.messages) return;
+      const index = state.currentChat.data.messages.findIndex(
+        (m) => m.id === messageId,
+      );
+      if (index !== -1) {
+        state.currentChat.data.messages = state.currentChat.data.messages.slice(0, index + 1);
+      }
+    },
+
     // replaceTempMessage: (state, action) => {
     //   if (!state.currentChat?.data?.messages) return;
     //   const index = state.currentChat.data.messages.findIndex(
@@ -343,6 +460,8 @@ const chatSlice = createSlice({
     finalizeAssistantMessage: (state, action) => {
       if (!state.currentChat?.data?.messages) return;
 
+      const payload = action.payload as Partial<Message> & { userMessageId?: string };
+
       const index = state.currentChat.data.messages.findIndex(
         (msg) =>
           (msg as Message).isStreaming === true && msg.role === "assistant",
@@ -353,10 +472,18 @@ const chatSlice = createSlice({
         // Merge existing with final data and clear streaming flags
         state.currentChat.data.messages[index] = {
           ...existing,
-          ...(action.payload as Partial<Message>),
+          ...payload,
           isStreaming: false,
           isTemp: false,
         };
+      }
+
+      // Sync user message ID from backend response
+      if (payload?.userMessageId && index > 0) {
+        const userMsg = state.currentChat.data.messages[index - 1];
+        if (userMsg && userMsg.role === "user") {
+          userMsg.id = payload.userMessageId;
+        }
       }
     },
 
@@ -492,6 +619,25 @@ const chatSlice = createSlice({
         state.isGenerating = false;
         state.error = action.payload as string;
       })
+
+      // ---------- EDIT MESSAGE STREAM LIFECYCLE ----------
+      .addCase(editMessageStream.pending, (state) => {
+        state.isGenerating = true;
+        state.error = null;
+      })
+      .addCase(editMessageStream.fulfilled, (state) => {
+        state.isGenerating = false;
+        state.error = null;
+      })
+      .addCase(editMessageStream.rejected, (state, action) => {
+        state.isGenerating = false;
+        state.error = action.payload as string;
+        if (state.currentChat?.data?.messages) {
+          state.currentChat.data.messages = state.currentChat.data.messages.filter(
+            (msg) => !((msg as Message).isStreaming && msg.role === "assistant"),
+          );
+        }
+      })
       .addMatcher(
         (action) =>
           ["auth/logoutUser/fulfilled", "auth/loginUser/fulfilled", "auth/registerUser/fulfilled", "auth/googleLogin/fulfilled"].includes(action.type),
@@ -505,6 +651,8 @@ export const {
   updateChatName,
   addChatToAllChats,
   addTempMessage,
+  updateMessageContent,
+  removeMessagesAfter,
   // replaceTempMessage,
   appendStreamChunk,
   finalizeAssistantMessage,

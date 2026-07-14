@@ -1,25 +1,23 @@
 import { Request, Response, NextFunction } from "express";
-import { streamMessage } from "../../../../lib/message";
-import { createMessageSchema } from "../../../../validator/chat";
+import { streamEditMessage } from "../../../../lib/message";
 
-const streamCreate = async (
+const streamEdit = async (
   req: Request,
   res: Response,
   next: NextFunction,
 ): Promise<void> => {
   const userId = req.user!.id;
 
-  const parsed = createMessageSchema.safeParse(req.body);
+  const { chatId, messageId, prompt } = req.body as {
+    chatId: string;
+    messageId: string;
+    prompt: string;
+  };
 
-  if (!parsed.success) {
-    res.status(400).json({
-      message: "Validation failed",
-      errors: parsed.error.errors.map((e) => e.message),
-    });
+  if (!chatId || !messageId || !prompt?.trim()) {
+    res.status(400).json({ message: "chatId, messageId, and prompt are required" });
     return;
   }
-
-  const { chatId, prompt, files, schema, tools } = parsed.data;
 
   const abortController = new AbortController();
   const signal = abortController.signal;
@@ -34,14 +32,12 @@ const streamCreate = async (
   res.setHeader("X-Accel-Buffering", "no");
 
   try {
-    const { stream, complete } = await streamMessage({
+    const { stream, complete } = await streamEditMessage({
       userId,
       chatId,
-      prompt,
-      files,
+      messageId,
+      prompt: prompt.trim(),
       signal,
-      schema,
-      tools,
     });
 
     for await (const chunk of stream) {
@@ -64,10 +60,10 @@ const streamCreate = async (
       : errorMessage.length > 200
         ? errorMessage.slice(0, 200) + "..."
         : errorMessage;
-    console.error("[Stream] Error:", friendlyMessage);
+    console.error("[StreamEdit] Error:", friendlyMessage);
     res.write(`data: ${JSON.stringify({ error: friendlyMessage })}\n\n`);
     res.end();
   }
 };
 
-export default streamCreate;
+export default streamEdit;

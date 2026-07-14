@@ -40,6 +40,27 @@ const findChatById = async (id: string) => {
   return chat;
 };
 
+const updateMessageInChat = async (
+  chatId: string,
+  messageId: string,
+  content: string,
+) => {
+  const chat = await Chat.findById(chatId);
+  if (!chat) throw notFound();
+
+  const msgIndex = chat.messages.findIndex(
+    (msg) => msg._id?.toString() === messageId,
+  );
+  if (msgIndex === -1) throw notFound();
+
+  chat.messages[msgIndex].content = content;
+  chat.messages = chat.messages.slice(0, msgIndex + 1);
+  chat.markModified("messages");
+  await chat.save();
+
+  return chat;
+};
+
 const removeChat = async (id: string) => {
   const chat = await Chat.findById(id);
   if (!chat) {
@@ -63,4 +84,4 @@ const updateChat = async (id: string, data: Record<string, unknown>) => {
   return updatedChat;
 };
 
-export { createChat, findAll, findChatById, removeChat, updateChat };
+export { createChat, findAll, findChatById, removeChat, updateChat, updateMessageInChat };

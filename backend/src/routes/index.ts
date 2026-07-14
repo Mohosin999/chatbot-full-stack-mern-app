@@ -35,6 +35,14 @@ router.post(
   messageController.streamCreate,
 );
 
-router.get("/api/v1/user", authenticate, userController.getUser);
+router.post(
+  "/api/v1/messages/stream/edit",
+  authenticate,
+  messageController.streamEdit,
+);
+
+router
+  .get("/api/v1/user", authenticate, userController.getUser)
+  .patch("/api/v1/user", authenticate, userController.updateMe);
 
 export default router;
