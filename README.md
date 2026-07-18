@@ -75,7 +75,6 @@ Chatbot is a full-stack AI platform that leverages Google Gemini to generate int
 | Express.js                | Web framework         |
 | MongoDB + Mongoose        | Database and ODM      |
 | Google Gemini AI          | Chatbot functionality |
-| ImageKit                  | Image storage         |
 | JWT                       | Authentication        |
 | Swagger UI                | API documentation     |
 | Express OpenAPI Validator | Request validation    |
@@ -95,7 +94,7 @@ chatbot/
 │   │   │   ├── chat/        # Chat controllers & routes
 │   │   │   ├── message/     # Message controllers & routes
 │   │   │   └── user/        # User controllers & routes
-│   │   ├── config/          # Gemini, ImageKit, OpenAI configs
+│   │   ├── config/          # Gemini, OpenAI configs
 │   │   ├── db/              # Database connection
 │   │   ├── lib/             # Utility functions
 │   │   ├── middleware/      # Auth middleware
@@ -136,7 +135,7 @@ chatbot/
 - Node.js 18+
 - MongoDB (local or Atlas)
 - Google Cloud Platform account (for Gemini AI)
-- ImageKit account (for image storage)
+- Google OAuth 2.0 credentials (for authentication)
 
 ### Installation
 
@@ -170,15 +169,14 @@ chatbot/
    MONGODB_URL=your_mongodb_connection_string
    ACCESS_TOKEN_SECRET=your_jwt_secret
    GEMINI_API_KEY=your_gemini_api_key
-   IMAGEKIT_PUBLIC_KEY=your_imagekit_public_key
-   IMAGEKIT_PRIVATE_KEY=your_imagekit_private_key
-   IMAGEKIT_URL_ENDPOINT=your_imagekit_url_endpoint
+   GOOGLE_CLIENT_ID=your_google_client_id
    ```
 
    Create `frontend/.env`:
 
    ```env
    VITE_BASE_URL=http://localhost:3000/api/v1
+   VITE_GOOGLE_CLIENT_ID=your_google_client_id
    ```
 
 ### Running the Application
