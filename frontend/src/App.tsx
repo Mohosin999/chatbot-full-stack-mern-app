@@ -9,7 +9,7 @@ import "./assets/prism.css";
 
 const App = () => {
   return (
-    <div className="selection:bg-orange-400">
+    <div>
       <Toaster position="top-right" />
 
       <Routes>
