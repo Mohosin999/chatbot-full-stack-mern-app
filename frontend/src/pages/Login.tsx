@@ -1,12 +1,12 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useDispatch } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import { LoaderCircle, Bot } from "lucide-react";
 
 import { GoogleLogin } from "@react-oauth/google";
+import { FcGoogle } from "react-icons/fc";
 import {
   clearError,
   loginUser,
@@ -52,7 +52,7 @@ const Login = () => {
     (searchParams.get("mode") as AuthMode) || "login",
   );
 
-  const images = ["/img/one.jpg", "/img/three.jpg"];
+  const images = ["/img/cortex.png"];
 
   const [currentImage, setCurrentImage] = useState(0);
 
@@ -112,6 +112,12 @@ const Login = () => {
     }
   }, [user, error, form, navigate, dispatch, mode]);
 
+  const handleGoogleSuccess = (credentialResponse: { credential?: string }) => {
+    if (credentialResponse.credential) {
+      dispatch(googleLogin(credentialResponse.credential) as any);
+    }
+  };
+
   const handleSubmit = useCallback(
     (values: MergedFormData) => {
       if (mode === "login") {
@@ -143,9 +149,11 @@ const Login = () => {
     <div className="bg-[#121212]">
       {/* Hero Section */}
       <div className="w-full min-h-screen flex flex-col lg:flex-row items-center lg:px-12">
-        {/* Left - Circular Brand with Image Carousel */}
+        {/* ===================================================================
+                                 Left - Form Section
+          ===================================================================*/}
         <div className="lg:w-1/2 flex items-center justify-center p-6 lg:p-8 w-full">
-          <div className="relative w-[min(70vw,600px)] aspect-square rounded-full overflow-hidden shadow-2xl shadow-black/40">
+          <div className="relative w-[min(70vw,600px)] aspect-square rounded-full overflow-hidden">
             {images.map((src, index) => (
               <div
                 key={src}
@@ -155,19 +163,21 @@ const Login = () => {
                 <img src={src} alt="" className="w-full h-full object-cover" />
               </div>
             ))}
-            <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/70" />
+            <div className="absolute inset-0 bg-linear-to-b from-black/40 via-black/20 to-black/70" />
           </div>
         </div>
 
-        {/* Right - Form */}
-        <div className="lg:w-1/2 flex items-center justify-center p-6 lg:p-28">
+        {/* ===================================================================
+                                 Right - Form Section
+          ===================================================================*/}
+        <div className="lg:w-1/2 flex items-center justify-center p-6 lg:p-32">
           <div ref={formRef} className="w-full">
-            <div className="flex lg:hidden items-center gap-2 mb-8">
+            {/* <div className="flex lg:hidden items-center gap-2 mb-8">
               <div className="w-9 h-9 bg-gradient-to-br from-blue-400 to-cyan-300 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/20">
                 <Bot className="w-5 h-5 text-white" />
               </div>
               <span className="text-lg font-bold text-white">SmartChat</span>
-            </div>
+            </div> */}
 
             <div className="mb-8">
               <h2 className="text-3xl font-bold text-white mb-2">
@@ -175,8 +185,8 @@ const Login = () => {
               </h2>
               <p className="text-gray-400">
                 {mode === "login"
-                  ? "Sign in to continue to SmartChat"
-                  : "Sign up to get started with SmartChat"}
+                  ? "Sign in to continue to Chat-AI"
+                  : "Sign up to get started with Chat-AI"}
               </p>
             </div>
 
@@ -293,25 +303,23 @@ const Login = () => {
               </div>
             </div>
 
-            {/* ==================================================
-                               Google Login Button
-             ===================================================*/}
-            <div className="flex justify-center">
-              <GoogleLogin
-                onSuccess={(credentialResponse) => {
-                  if (credentialResponse.credential) {
-                    dispatch(googleLogin(credentialResponse.credential) as any);
-                  }
-                }}
-                onError={() => {
-                  toast.error("Google login failed");
-                }}
-                size="large"
-                shape="rectangular"
-                width="100%"
-                theme="filled_black"
-                text={mode === "login" ? "signin_with" : "signup_with"}
-              />
+            <div className="relative">
+              <div className="absolute inset-0 opacity-0 z-10">
+                <GoogleLogin
+                  onSuccess={handleGoogleSuccess}
+                  onError={() => toast.error("Google login failed")}
+                  size="large"
+                  width="100%"
+                  theme="outline"
+                />
+              </div>
+              <button
+                type="button"
+                className="w-full pointer-events-none inline-flex items-center justify-center gap-3 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 transition-all duration-200 text-gray-700 dark:text-white font-medium text-sm"
+              >
+                <FcGoogle className="w-5 h-5" />
+                Continue with Google
+              </button>
             </div>
 
             <p className="text-center text-sm text-gray-500 mt-6">
@@ -343,6 +351,9 @@ const Login = () => {
         </div>
       </div>
 
+      {/* ===================================================================
+                                  Pricing Section
+        ===================================================================*/}
       <Plans onPlanClick={scrollToForm} />
     </div>
   );
