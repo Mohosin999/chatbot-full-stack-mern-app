@@ -111,7 +111,7 @@ const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(({ onSend, isStrea
 
   return (
     <div className="w-full px-4 md:px-0 flex flex-col items-center">
-      <div className="relative w-full rounded-xl border border-gray-300 bg-white dark:bg-[#303030] dark:border-[#303030] shadow-md group">
+      <div className="relative w-full rounded-full border border-gray-300 bg-white dark:bg-[#303030] dark:border-[#303030] shadow-md group">
 
         {selectedFiles.length > 0 && (
           <div className="flex flex-wrap gap-2 px-3 pt-3 pb-1">
@@ -154,7 +154,7 @@ const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(({ onSend, isStrea
             }`}
             title={selectedFiles.length >= MAX_FILES ? `Max ${MAX_FILES} files` : "Attach files"}
           >
-            <FaPlus size={14} />
+            <FaPlus size={16} />
           </button>
 
           <input
@@ -172,10 +172,10 @@ const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(({ onSend, isStrea
             onChange={handleInput}
             onInput={adjustHeight}
             onKeyDown={handleKeyDown}
-            placeholder="Ask without limits..."
+            placeholder="Ask anything"
             rows={1}
             disabled={!token}
-            className={`flex-1 resize-none overflow-hidden rounded-xl bg-transparent px-2 py-3 pr-2 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-0 transition-all duration-150 max-h-60 ${
+            className={`flex-1 resize-none overflow-hidden rounded-xl bg-transparent px-2 py-4 pr-2 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-0 transition-all duration-150 max-h-60 ${
               !token ? "cursor-not-allowed opacity-50 select-none" : ""
             }`}
           />

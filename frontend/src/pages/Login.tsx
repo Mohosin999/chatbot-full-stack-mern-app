@@ -1,5 +1,3 @@
-
-
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
@@ -157,7 +155,7 @@ const Login = () => {
           <div ref={formRef} className="w-full max-w-md mx-auto lg:mx-0">
             {/* Card Container - Only for small screens */}
             <div className="p-2">
-              <div className="mb-8 text-center lg:text-left">
+              <div className="mb-8 text-center">
                 <h2 className="text-2xl font-semibold text-gray-200 mb-1">
                   {mode === "login" ? "Welcome back" : "Create account"}
                 </h2>
@@ -225,7 +223,7 @@ const Login = () => {
                               type="text"
                               autoComplete="name"
                               placeholder="Enter your name"
-                            className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 placeholder:text-sm focus:border-none focus:ring-blue-500/20 h-10"
+                              className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 placeholder:text-sm focus:border-none focus:ring-blue-500/20 h-10"
                             />
                           </FormControl>
                           <FormMessage className="text-xs" />

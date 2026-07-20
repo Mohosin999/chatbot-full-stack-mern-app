@@ -189,7 +189,7 @@ const ContentArea = () => {
             <>
               <div className="flex-1 flex flex-col overflow-y-auto" ref={chatContainerRef}>
                 <div className="px-4 xl:pr-1 relative flex-1">
-                  <div className="flex flex-col space-y-2 w-full md:max-w-2xl xl:max-w-3xl mx-auto mt-4 relative">
+                  <div className="flex flex-col space-y-4 w-full md:max-w-2xl xl:max-w-3xl mx-auto mt-4 relative">
                     {messages!.map((msg) => (
                       <Message key={msg.id} msg={msg} onEdit={isGenerating ? undefined : handleEdit} />
                     ))}
