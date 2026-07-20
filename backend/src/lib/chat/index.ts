@@ -26,7 +26,7 @@ const createChat = async (user: IUser) => {
 const findAll = async (userId: string) => {
   if (!userId) throw new Error("User id is required");
 
-  return Chat.find({ userId }).sort({ updatedAt: -1 });
+  return Chat.find({ userId }).sort({ createdAt: -1 });
 };
 
 const findChatById = async (id: string) => {

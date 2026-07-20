@@ -152,6 +152,29 @@ export const deleteChatById = createAsyncThunk(
   },
 );
 
+export const renameChatById = createAsyncThunk(
+  "chat/renameChatById",
+  async ({ chatId, name }: { chatId: string; name: string }, { rejectWithValue }) => {
+    try {
+      const accessToken = localStorage.getItem("accessToken");
+      if (!accessToken)
+        return rejectWithValue("No authentication accessToken found");
+
+      const res = await api.patch(
+        `${import.meta.env.VITE_BASE_URL}/chats/${chatId}`,
+        { name },
+        { headers: { Authorization: `Bearer ${accessToken}` } },
+      );
+
+      return { chatId, name, data: res.data };
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Rename chat failed",
+      );
+    }
+  },
+);
+
 export const createMessageStream = createAsyncThunk(
   "chat/createMessageStream",
   async (
@@ -606,6 +629,24 @@ const chatSlice = createSlice({
       .addCase(deleteChatById.rejected, (state, action) => {
         state.isDeleting = false;
         state.error = action.payload as string;
+      })
+
+      // ---------- RENAME CHAT LIFECYCLE ----------
+      .addCase(renameChatById.fulfilled, (state, action) => {
+        const { chatId, name } = action.payload;
+
+        if (state.currentChat?.data?.id === chatId) {
+          state.currentChat.data.name = name;
+        }
+
+        if (state.allChats?.data) {
+          const index = state.allChats.data.findIndex((c) => c.id === chatId);
+          if (index !== -1) {
+            const [chat] = state.allChats.data.splice(index, 1);
+            chat.name = name;
+            state.allChats.data.unshift(chat);
+          }
+        }
       })
 
       // ---------- COMMENTED OUT: CREATE MESSAGE LIFECYCLE ----------

@@ -24,14 +24,14 @@ const ChatList = ({
 }: ChatListProps) => {
   if (!token)
     return (
-      <p className="text-gray-400 text-center mt-4 h-full">
+      <p className="text-gray-500 dark:text-gray-400 text-center mt-4 h-full">
         Login to see your chats.
       </p>
     );
 
   if (chats?.length === 0)
     return (
-      <p className="text-gray-400 text-center mt-4 h-full">No chats found.</p>
+      <p className="text-gray-500 dark:text-gray-400 text-center mt-4 h-full">No chats found.</p>
     );
 
   return (

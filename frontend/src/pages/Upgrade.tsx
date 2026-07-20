@@ -7,7 +7,7 @@ const Upgrade = () => {
 
   return (
     <div className="min-h-screen bg-[#121212]">
-      <div className="max-w-6xl mx-auto px-4 py-6">
+      <div className="max-w-6xl mx-auto px-4 pt-6">
         <button
           onClick={() => navigate(-1)}
           className="flex items-center gap-2 text-gray-400 hover:text-white transition cursor-pointer"

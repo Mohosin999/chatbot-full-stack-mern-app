@@ -186,4 +186,5 @@
 .reset-tw li,
 .reset-tw blockquote {
   line-height: 1.8 !important;
+  margin: 6px !important;
 }

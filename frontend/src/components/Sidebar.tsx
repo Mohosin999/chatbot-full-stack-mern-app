@@ -20,17 +20,21 @@ import type { ChatData } from "@/types";
 
 interface SidebarProps {
   handleSidebarClose?: () => void;
+  collapsed?: boolean;
+  onToggleCollapse?: () => void;
+  onClose?: () => void;
+  onSearchOpen?: () => void;
 }
 
-const Sidebar = ({ handleSidebarClose }: SidebarProps) => {
+const Sidebar = ({ handleSidebarClose, collapsed = false, onToggleCollapse, onClose, onSearchOpen }: SidebarProps) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { allChats, currentChat } = useAppSelector((state) => state.chat);
   const token = localStorage.getItem("accessToken") || "";
 
-  const [searchTerm, setSearchTerm] = useState("");
   const [chatToDelete, setChatToDelete] = useState<ChatData | null>(null);
   const [alertOpen, setAlertOpen] = useState(false);
+
   useEffect(() => {
     if (!token) return;
 
@@ -117,21 +121,21 @@ const Sidebar = ({ handleSidebarClose }: SidebarProps) => {
     navigate("/loading");
   };
 
-  const filteredChats = allChats?.data?.filter((chat) =>
-    chat.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const allChatsData = allChats?.data || [];
 
   return (
-    <div className="flex flex-col h-screen px-3 xl:px-4 bg-[#181818] text-white">
+    <div className="flex flex-col h-full px-3 xl:px-4 bg-[#F9FAFB] dark:bg-[#181818] text-gray-900 dark:text-white">
       <SidebarHeader
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
+        collapsed={collapsed}
+        onToggleCollapse={onToggleCollapse || (() => {})}
+        onSearchClick={() => onSearchOpen?.()}
         onCreateChat={handleCreateChat}
+        onClose={onClose}
       />
 
       <ChatList
         token={token}
-        chats={filteredChats}
+        chats={allChatsData}
         currentChat={currentChat}
         onSelectChat={handleGetChatById}
         chatToDelete={chatToDelete}

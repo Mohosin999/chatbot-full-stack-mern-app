@@ -91,7 +91,7 @@ const Message = ({ msg, onEdit }: MessageProps) => {
           msg.role === "user"
             ? isEditing
               ? "bg-gray-200 dark:bg-[#3a3a3a] rounded-2xl w-full md:max-w-2xl"
-              : "bg-gray-300 dark:bg-[#303030] rounded-2xl rounded-br-sm px-4 py-2.5"
+              : "bg-gray-300 dark:bg-[#303030] rounded-2xl rounded-br-sm px-3"
             : "w-full"
         }`}
       >
@@ -102,7 +102,7 @@ const Message = ({ msg, onEdit }: MessageProps) => {
             <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:300ms]" />
           </span>
         ) : isEditing ? (
-          <div className="flex flex-col gap-2 p-1">
+          <div className="flex flex-col gap-2">
             <textarea
               ref={textareaRef}
               value={editText}
@@ -156,20 +156,19 @@ const Message = ({ msg, onEdit }: MessageProps) => {
             <div className="text-base reset-tw text-gray-900 dark:text-gray-200 leading-relaxed">
               <Markdown>{msg.content}</Markdown>
             </div>
-
-            {showEditButton && (
-              <button
-                onClick={() => {
-                  setEditText(msg.content);
-                  setIsEditing(true);
-                }}
-                className="mt-1.5 flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:text-blue-500 dark:hover:text-blue-400"
-              >
-                <Pencil size={12} />
-                Edit
-              </button>
-            )}
           </div>
+        )}
+
+        {showEditButton && (
+          <button
+            onClick={() => {
+              setEditText(msg.content);
+              setIsEditing(true);
+            }}
+            className="absolute -right-8 top-0 flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:text-blue-500 dark:hover:text-blue-400"
+          >
+            <Pencil size={12} />
+          </button>
         )}
       </div>
     </div>
