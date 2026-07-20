@@ -59,7 +59,7 @@ const Home = () => {
           </Button>
 
           <div className="flex items-center justify-center mx-auto">
-            <h2 className="text-2xl font-semibold ml-2">Chatbot</h2>
+            <h2 className="text-xl font-semibold ml-2">Chatbot</h2>
           </div>
         </div>
       </header>

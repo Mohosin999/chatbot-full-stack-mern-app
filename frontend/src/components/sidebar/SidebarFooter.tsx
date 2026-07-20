@@ -19,8 +19,8 @@ import { IoMdLogIn } from "react-icons/io";
 import {
   Crown,
   LogOut,
-  Palette,
   Settings,
+  Palette,
   User,
 } from "lucide-react";
 
@@ -162,11 +162,10 @@ const SidebarFooter = ({
                     setShowMenu(false);
                     navigate("/upgrade");
                   }}
-                  className="flex items-center gap-2 w-full px-3 py-2 text-sm text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 hover:bg-gray-100 dark:hover:bg-[#303841] transition cursor-pointer"
+                  className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#303841] transition cursor-pointer"
                 >
                   <Crown size={15} /> Upgrade Plan
                 </button>
-
                 <button
                   onClick={() => openSettingsPopup("personalization")}
                   className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#303841] transition cursor-pointer"

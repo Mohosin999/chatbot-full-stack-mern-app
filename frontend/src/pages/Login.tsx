@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import toast from "react-hot-toast";
-import { LoaderCircle, Bot } from "lucide-react";
+import { LoaderCircle } from "lucide-react";
 
 import { GoogleLogin } from "@react-oauth/google";
 import { FcGoogle } from "react-icons/fc";
@@ -17,7 +17,6 @@ import {
 } from "@/features/auth/authSlice";
 import { useAppSelector } from "@/hooks/useAppStore";
 
-import Plans from "@/components/Plans";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -53,17 +52,6 @@ const Login = () => {
   const [mode, setMode] = useState<AuthMode>(
     (searchParams.get("mode") as AuthMode) || "login",
   );
-
-  const images = ["/img/cortex.png"];
-
-  const [currentImage, setCurrentImage] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentImage((prev) => (prev + 1) % images.length);
-    }, 4000);
-    return () => clearInterval(interval);
-  }, []);
 
   const formRef = useRef<HTMLDivElement>(null);
   const emailInputRef = useRef<HTMLInputElement>(null);
@@ -131,15 +119,15 @@ const Login = () => {
     [dispatch, mode],
   );
 
-  const scrollToForm = () => {
-    formRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-    setTimeout(() => {
-      (mode === "login"
-        ? emailInputRef.current
-        : nameInputRef.current
-      )?.focus();
-    }, 500);
-  };
+  // const scrollToForm = () => {
+  //   formRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+  //   setTimeout(() => {
+  //     (mode === "login"
+  //       ? emailInputRef.current
+  //       : nameInputRef.current
+  //     )?.focus();
+  //   }, 500);
+  // };
 
   const switchMode = (newMode: AuthMode) => {
     setMode(newMode);
@@ -148,42 +136,35 @@ const Login = () => {
   };
 
   return (
-    <div className="bg-[#121212] pt-10 lg:pt-0">
+    <div className="bg-[#121212] h-screen overflow-hidden">
       {/* Hero Section */}
-      <div className="w-full min-h-screen flex flex-col lg:flex-row items-center lg:px-12">
+      <div className="w-full h-full flex flex-col lg:flex-row">
         {/* ===================================================================
                                  Left - Image Section
           ===================================================================*/}
-        <div className="lg:w-1/2 flex items-center justify-center p-0 lg:p-8 pb-6 lg:pb-0 w-full">
-          <div className="relative w-[min(70vw,600px)] aspect-square rounded-full overflow-hidden">
-            {images.map((src, index) => (
-              <div
-                key={src}
-                className="absolute inset-0 transition-opacity duration-1000"
-                style={{ opacity: index === currentImage ? 1 : 0 }}
-              >
-                <img src={src} alt="" className="w-full h-full object-cover" />
-              </div>
-            ))}
-            <div className="absolute inset-0 bg-linear-to-b from-black/40 via-black/20 to-black/70" />
-          </div>
+        <div className="lg:w-1/2 hidden lg:block">
+          <img
+            src="/img/home.png"
+            alt=""
+            className="w-full h-full object-cover"
+          />
         </div>
 
         {/* ===================================================================
                                  Right - Form Section
           ===================================================================*/}
-        <div className="lg:w-1/2 flex items-center justify-center p-4 lg:p-10 xl:p-24 w-full">
+        <div className="lg:w-1/2 flex items-center justify-center p-4 lg:p-10 xl:p-24 w-full h-full overflow-y-auto">
           <div ref={formRef} className="w-full max-w-md mx-auto lg:mx-0">
             {/* Card Container - Only for small screens */}
-            <div className="md:bg-transparent md:backdrop-blur-none md:border-none md:p-0 bg-[#171717] backdrop-blur-sm border border-white/10 rounded-2xl p-6 sm:p-8">
-              <div className="mb-8">
-                <h2 className="text-3xl font-bold text-gray-200 mb-2">
+            <div className="p-2">
+              <div className="mb-8 text-center lg:text-left">
+                <h2 className="text-2xl font-semibold text-gray-200 mb-1">
                   {mode === "login" ? "Welcome back" : "Create account"}
                 </h2>
-                <p className="text-gray-400">
+                <p className="text-gray-400 text-sm">
                   {mode === "login"
-                    ? "Sign in to continue to CORTEX"
-                    : "Sign up to get started with CORTEX"}
+                    ? "Let's sign in to explore the chatbot."
+                    : "Sign up to get started with Chatbot"}
                 </p>
               </div>
 
@@ -201,7 +182,7 @@ const Login = () => {
                   </div>
                   <button
                     type="button"
-                    className="w-full pointer-events-none inline-flex items-center justify-center gap-3 px-4 py-3 border border-gray-600 rounded-lg hover:bg-white/5 transition-all duration-200 text-gray-100 font-medium text-sm"
+                    className="w-full pointer-events-none inline-flex items-center justify-center gap-3 px-4 py-3 bg-white hover:bg-white/80 text-gray-900 rounded-full transition-all duration-200 font-medium text-sm"
                   >
                     <FcGoogle className="w-5 h-5" />
                     Continue with Google
@@ -215,8 +196,8 @@ const Login = () => {
                   <span className="w-full border-t border-white/10" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-[#121212] px-3 text-gray-500">
-                    Or continue with email
+                  <span className="bg-[#121212] font-semibold px-3 text-gray-500">
+                    OR
                   </span>
                 </div>
               </div>
@@ -236,9 +217,6 @@ const Login = () => {
                       name="name"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-gray-300 text-sm">
-                            Name
-                          </FormLabel>
                           <FormControl>
                             <Input
                               {...field}
@@ -246,8 +224,8 @@ const Login = () => {
                               value={field.value ?? ""}
                               type="text"
                               autoComplete="name"
-                              placeholder="John Doe"
-                              className="bg-white/5 border-white/10 text-white placeholder:text-gray-600 focus:border-none focus:ring-blue-500/20 h-11"
+                              placeholder="Enter your name"
+                            className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 placeholder:text-sm focus:border-none focus:ring-blue-500/20 h-10"
                             />
                           </FormControl>
                           <FormMessage className="text-xs" />
@@ -261,9 +239,6 @@ const Login = () => {
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-gray-300 text-sm">
-                          Email
-                        </FormLabel>
                         <FormControl>
                           <Input
                             {...field}
@@ -271,8 +246,8 @@ const Login = () => {
                             value={field.value ?? ""}
                             type="email"
                             autoComplete="email"
-                            placeholder="johndoe@example.com"
-                            className="bg-white/5 border-white/10 text-white placeholder:text-gray-600 focus:border-none focus:ring-blue-500/20 h-11"
+                            placeholder="Enter your email"
+                            className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 placeholder:text-sm focus:border-none focus:ring-blue-500/20 h-10"
                           />
                         </FormControl>
                         <FormMessage className="text-xs" />
@@ -285,9 +260,6 @@ const Login = () => {
                     name="password"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-gray-300 text-sm">
-                          Password
-                        </FormLabel>
                         <FormControl>
                           <Input
                             {...field}
@@ -298,8 +270,8 @@ const Login = () => {
                                 ? "current-password"
                                 : "new-password"
                             }
-                            placeholder="••••••••"
-                            className="bg-white/5 border-white/10 text-white placeholder:text-gray-600 focus:border-none focus:ring-blue-500/20 h-11"
+                            placeholder="Enter your password"
+                            className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 placeholder:text-sm focus:border-none focus:ring-blue-500/20 h-10"
                           />
                         </FormControl>
                         <FormMessage className="text-xs" />
@@ -309,7 +281,7 @@ const Login = () => {
 
                   <Button
                     type="submit"
-                    className="w-full cursor-pointer bg-white hover:bg-white/80 text-gray-900 font-medium py-2.5 h-11 rounded-lg transition-all duration-200"
+                    className="w-full bg-gray-800 cursor-pointer border border-gray-600 hover:bg-gray-900 text-gray-200 font-medium py-2.5 h-10 rounded-lg transition-all duration-200"
                     disabled={loading}
                   >
                     {loading ? (
@@ -356,7 +328,6 @@ const Login = () => {
       {/* ===================================================================
                                   Pricing Section
         ===================================================================*/}
-      <Plans onPlanClick={scrollToForm} />
     </div>
   );
 };

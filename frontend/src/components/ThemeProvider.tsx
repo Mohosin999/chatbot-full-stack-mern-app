@@ -10,7 +10,7 @@ const ThemeProvider = ({ children }: ThemeProviderProps) => {
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
 
-  const isLoginPage = location.pathname === "/login" || location.pathname === "/upgrade";
+  const isLoginPage = location.pathname === "/login" || location.pathname === "/upgrade" || location.pathname === "/loading";
 
   return (
     <div>
