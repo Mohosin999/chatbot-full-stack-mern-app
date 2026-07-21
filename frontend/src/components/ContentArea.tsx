@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from "react";
 import { ChevronDown } from "lucide-react";
-import ChatInput, { type ChatInputHandle } from "./ui/ChatInput";
+import ChatInput, { type ChatInputHandle } from "./ChatInput";
 import { useDispatch } from "react-redux";
 import Message from "./Message";
 import {

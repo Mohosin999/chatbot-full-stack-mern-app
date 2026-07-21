@@ -46,13 +46,12 @@ const Home = () => {
   const searchResults = useMemo(() => {
     if (!searchQuery.trim()) return [];
     const q = searchQuery.toLowerCase();
-    return allChatsData.filter((chat) =>
-      chat.name.toLowerCase().includes(q)
-    );
+    return allChatsData.filter((chat) => chat.name.toLowerCase().includes(q));
   }, [searchQuery, allChatsData]);
 
   return (
     <div className="flex flex-col min-h-screen">
+      {/* --------------------- Header for mobile ---------------------*/}
       <header className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white dark:bg-[#212121] border-b shadow-sm">
         <div className="flex items-center justify-between px-4 py-3">
           <Button
@@ -70,8 +69,9 @@ const Home = () => {
       </header>
 
       <div className="flex flex-1 relative">
+        {/* ---------------- Sidebar for large screens ---------------- */}
         <aside
-          className="hidden lg:block bg-[#F9FAFB] dark:bg-[#181818] h-screen overflow-hidden flex-shrink-0 transition-[width] duration-500 ease-in-out border-r border-gray-300 dark:border-gray-700"
+          className="hidden lg:block bg-[#F9FAFB] dark:bg-[#181818] h-screen overflow-hidden shrink-0 transition-[width] duration-500 ease-in-out border-r border-gray-300 dark:border-gray-700"
           style={{ width: collapsed ? 0 : 300 }}
         >
           <div className="min-w-[260px] h-full">
@@ -83,6 +83,7 @@ const Home = () => {
           </div>
         </aside>
 
+        {/* ---------------- Collapsed Sidebar Button ---------------- */}
         {collapsed && (
           <button
             onClick={() => setCollapsed(false)}
@@ -93,9 +94,12 @@ const Home = () => {
           </button>
         )}
 
+        {/* --------------- Sidebar for small screens --------------- */}
         <div
           className={`lg:hidden fixed inset-0 z-50 transition-opacity duration-300 ${
-            isSidebarOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+            isSidebarOpen
+              ? "opacity-100 pointer-events-auto"
+              : "opacity-0 pointer-events-none"
           }`}
         >
           <div
@@ -104,15 +108,21 @@ const Home = () => {
           ></div>
 
           <div
-            className={`absolute top-0 left-0 w-80 h-full bg-[#181818] text-white shadow-lg flex flex-col transition-transform duration-300 ease-in-out ${
+            className={`absolute top-0 left-0 w-72 h-full bg-[#181818] text-white shadow-lg flex flex-col transition-transform duration-300 ease-in-out ${
               isSidebarOpen ? "translate-x-0" : "-translate-x-full"
             }`}
           >
-            <Sidebar handleSidebarClose={handleSidebarClose} onClose={handleSidebarClose} onSearchOpen={() => setSearchOpen(true)} />
+            <Sidebar
+              handleSidebarClose={handleSidebarClose}
+              onClose={handleSidebarClose}
+              onSearchOpen={() => setSearchOpen(true)}
+            />
           </div>
         </div>
 
-        <main className="flex-1 min-w-0 transition-[margin] duration-500 ease-in-out"
+        {/* ---------------------- Main area --------------------- */}
+        <main
+          className="flex-1 min-w-0 transition-[margin] duration-500 ease-in-out"
           style={{ marginLeft: collapsed ? 0 : undefined }}
         >
           <ContentArea />
@@ -122,7 +132,10 @@ const Home = () => {
       {searchOpen && (
         <div
           className="fixed inset-0 z-[300] max-lg:bg-white max-lg:dark:bg-[#1e1e1e] lg:bg-black/60 lg:flex lg:items-center lg:justify-center"
-          onClick={() => { setSearchOpen(false); setSearchQuery(""); }}
+          onClick={() => {
+            setSearchOpen(false);
+            setSearchQuery("");
+          }}
         >
           <div
             className="flex flex-col max-lg:h-full max-lg:w-full lg:max-h-[70vh] lg:w-[480px] lg:max-w-[90vw] lg:bg-white lg:dark:bg-[#1e1e1e] lg:rounded-xl lg:shadow-2xl overflow-hidden"
@@ -139,7 +152,10 @@ const Home = () => {
                 className="flex-1 bg-transparent text-sm text-gray-900 dark:text-white outline-none placeholder-gray-400"
               />
               <button
-                onClick={() => { setSearchOpen(false); setSearchQuery(""); }}
+                onClick={() => {
+                  setSearchOpen(false);
+                  setSearchQuery("");
+                }}
                 className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 transition cursor-pointer"
                 title="Close"
               >
@@ -150,7 +166,9 @@ const Home = () => {
             <div className="flex-1 overflow-y-auto p-2">
               {searchResults.length === 0 ? (
                 <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-8">
-                  {searchQuery.trim() ? "No chats match your search." : "No chats yet."}
+                  {searchQuery.trim()
+                    ? "No chats match your search."
+                    : "No chats yet."}
                 </p>
               ) : (
                 searchResults.map((chat) => (

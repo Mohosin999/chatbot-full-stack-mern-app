@@ -26,7 +26,13 @@ interface SidebarProps {
   onSearchOpen?: () => void;
 }
 
-const Sidebar = ({ handleSidebarClose, collapsed = false, onToggleCollapse, onClose, onSearchOpen }: SidebarProps) => {
+const Sidebar = ({
+  handleSidebarClose,
+  collapsed = false,
+  onToggleCollapse,
+  onClose,
+  onSearchOpen,
+}: SidebarProps) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { allChats, currentChat } = useAppSelector((state) => state.chat);
@@ -57,7 +63,7 @@ const Sidebar = ({ handleSidebarClose, collapsed = false, onToggleCollapse, onCl
         try {
           const chatDetailRes = await axios.get(
             `${import.meta.env.VITE_BASE_URL}/chats/${chat.id}`,
-            { headers: { Authorization: `Bearer ${token}` } }
+            { headers: { Authorization: `Bearer ${token}` } },
           );
 
           const fullChat =
@@ -74,7 +80,10 @@ const Sidebar = ({ handleSidebarClose, collapsed = false, onToggleCollapse, onCl
       });
 
       const results = await Promise.all(syncPromises);
-      const validResults = results.filter(Boolean) as { chatId: string; title: string }[];
+      const validResults = results.filter(Boolean) as {
+        chatId: string;
+        title: string;
+      }[];
 
       validResults.forEach(({ chatId, title }) => {
         dispatch(updateChatName({ chatId, chatName: title }));
@@ -117,26 +126,29 @@ const Sidebar = ({ handleSidebarClose, collapsed = false, onToggleCollapse, onCl
   const allChatsData = allChats?.data || [];
 
   return (
-    <div className="flex flex-col h-full px-3 xl:px-4 bg-[#F9FAFB] dark:bg-[#181818] text-gray-900 dark:text-white">
-      <SidebarHeader
-        collapsed={collapsed}
-        onToggleCollapse={onToggleCollapse || (() => {})}
-        onSearchClick={() => onSearchOpen?.()}
-        onCreateChat={handleCreateChat}
-        onClose={onClose}
-      />
+    <div className="flex flex-col h-full">
+      <div className="flex flex-col h-full px-3 xl:px-4 bg-[#F9FAFB] dark:bg-[#181818] text-gray-900 dark:text-white">
+        <SidebarHeader
+          collapsed={collapsed}
+          onToggleCollapse={onToggleCollapse || (() => {})}
+          onSearchClick={() => onSearchOpen?.()}
+          onCreateChat={handleCreateChat}
+          onClose={onClose}
+        />
 
-      <ChatList
-        token={token}
-        chats={allChatsData}
-        currentChat={currentChat}
-        onSelectChat={handleGetChatById}
-        chatToDelete={chatToDelete}
-        setChatToDelete={setChatToDelete}
-        alertOpen={alertOpen}
-        setAlertOpen={setAlertOpen}
-        onConfirmDelete={handleConfirmDeleteChat}
-      />
+        <ChatList
+          token={token}
+          chats={allChatsData}
+          currentChat={currentChat}
+          onSelectChat={handleGetChatById}
+          chatToDelete={chatToDelete}
+          setChatToDelete={setChatToDelete}
+          alertOpen={alertOpen}
+          setAlertOpen={setAlertOpen}
+          onConfirmDelete={handleConfirmDeleteChat}
+        />
+      </div>
+
       <SidebarFooter
         token={token}
         onLogout={handleLogout}

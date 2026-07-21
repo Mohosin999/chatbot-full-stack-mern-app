@@ -16,13 +16,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import SettingsPopup from "@/components/SettingsPopup";
 import { IoMdLogIn } from "react-icons/io";
-import {
-  Crown,
-  LogOut,
-  Settings,
-  Palette,
-  User,
-} from "lucide-react";
+import { Crown, LogOut, Settings, Palette, User } from "lucide-react";
+import { ConfirmDialog } from "../ConfirmDialog";
 
 interface SidebarFooterProps {
   token: string;
@@ -30,11 +25,7 @@ interface SidebarFooterProps {
   onLogin: () => void;
 }
 
-const SidebarFooter = ({
-  token,
-  onLogout,
-  onLogin,
-}: SidebarFooterProps) => {
+const SidebarFooter = ({ token, onLogout, onLogin }: SidebarFooterProps) => {
   const [alertOpen, setAlertOpen] = useState(false);
   const [settingsPopupOpen, setSettingsPopupOpen] = useState(false);
   const [settingsPopupTab, setSettingsPopupTab] = useState<
@@ -133,13 +124,13 @@ const SidebarFooter = ({
   };
 
   return (
-    <div className="flex flex-col gap-2 border-t border-gray-300 dark:border-gray-700 p-2">
+    <div className="flex flex-col gap-2 my-4 mx-1.5 xl:mx-2">
       <div className="flex items-center">
         {token ? (
           <div className="relative w-full" ref={menuRef}>
             <button
               onClick={() => setShowMenu((prev) => !prev)}
-              className="flex items-center gap-2 w-full p-1.5 rounded-lg hover:bg-gray-200 dark:hover:bg-[#303841] transition-colors cursor-pointer"
+              className="flex items-center gap-2 w-full p-1.5 xl:p-2 rounded-full hover:bg-gray-200 dark:hover:bg-[#212121] transition-colors cursor-pointer"
             >
               <Avatar className="w-8 h-8">
                 <AvatarImage src={profile?.avatar || "github.com"} />
@@ -151,7 +142,9 @@ const SidebarFooter = ({
                 <span className="text-sm font-medium text-gray-900 dark:text-white truncate">
                   {loading ? "Loading..." : profile?.name || "User"}
                 </span>
-                <span className="text-xs text-gray-500 dark:text-gray-400">Free</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  Free
+                </span>
               </div>
             </button>
 
@@ -194,20 +187,20 @@ const SidebarFooter = ({
               </div>
             )}
 
-            <AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
-              <AlertDialogContent className="w-96 p-4!">
+            {/* <AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
+              <AlertDialogContent className="lg:max-w-md p-4! bg-[#FFFFFF] dark:bg-[#222222]">
                 <AlertDialogHeader>
                   <AlertDialogTitle className="text-base font-medium">
                     Log Out
                   </AlertDialogTitle>
-                  <AlertDialogDescription className="text-sm lg:text-base text-gray-700 dark:text-gray-400 mt-1">
-                    Are you sure you want to log out? You'll need to log in again
-                    to access your account.
+                  <AlertDialogDescription className="text-sm text-gray-700 dark:text-gray-400 mt-1">
+                    Are you sure you want to log out? You'll need to log in
+                    again to access your account.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
 
                 <div className="flex justify-end gap-2 mt-4">
-                  <AlertDialogCancel className="px-3 py-1 rounded border text-sm cursor-pointer select-none active:scale-105">
+                  <AlertDialogCancel className="px-3 py-1 rounded-full border text-sm cursor-pointer select-none active:scale-105">
                     Cancel
                   </AlertDialogCancel>
                   <AlertDialogAction
@@ -215,13 +208,23 @@ const SidebarFooter = ({
                       onLogout();
                       setAlertOpen(false);
                     }}
-                    className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm cursor-pointer select-none active:scale-105"
+                    className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-full text-sm cursor-pointer select-none active:scale-105"
                   >
                     Logout
                   </AlertDialogAction>
                 </div>
               </AlertDialogContent>
-            </AlertDialog>
+            </AlertDialog> */}
+            <ConfirmDialog
+              open={alertOpen}
+              onOpenChange={setAlertOpen}
+              title="Log Out"
+              description="Are you sure you want to log out? You'll need to log in again to access your account."
+              confirmLabel="Logout"
+              cancelLabel="Cancel"
+              onConfirm={onLogout}
+              variant="destructive"
+            />
           </div>
         ) : (
           <Button

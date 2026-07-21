@@ -256,7 +256,7 @@ const Login = () => {
 
                   <Button
                     type="submit"
-                    className="w-full bg-gray-800 cursor-pointer border border-gray-600 hover:bg-gray-900 text-gray-200 font-medium py-2.5 h-10 rounded-lg transition-all duration-200"
+                    className="w-full bg-[#43454A] cursor-pointer border border-[#43454A] hover:bg-[#43454A]/80 text-gray-100 font-medium py-2.5 h-10 rounded-full transition-all duration-200"
                     disabled={loading}
                   >
                     {loading ? (

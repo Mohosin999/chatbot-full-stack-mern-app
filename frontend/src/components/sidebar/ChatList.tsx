@@ -36,6 +36,7 @@ const ChatList = ({
 
   return (
     <div className="flex-1 overflow-y-auto my-5 space-y-2 no-scrollbar scroll-smooth">
+      <h3 className="text-sm font-semibold">Recents</h3>
       <ul>
         {chats?.map((chat) => (
           <ChatItem

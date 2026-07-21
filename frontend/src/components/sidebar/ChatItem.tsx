@@ -15,6 +15,7 @@ import { useDispatch } from "react-redux";
 import { renameChatById } from "@/features/chat/chatSlice";
 import Loader from "../Loader";
 import type { ChatData } from "@/types";
+import { ConfirmDialog } from "../ConfirmDialog";
 
 interface ChatItemProps {
   chat: ChatData;
@@ -82,7 +83,7 @@ const ChatItem = ({
   return (
     <li
       onClick={() => onSelectChat(chat.id)}
-      className={`group text-sm flex items-center justify-between p-2 px-3 rounded-lg cursor-pointer transition select-none ${
+      className={`group text-sm flex items-center justify-between p-1 px-3 rounded-lg cursor-pointer transition select-none ${
         isSelected
           ? "bg-gray-200 dark:bg-[#303841]"
           : "hover:bg-gray-100 dark:hover:bg-[#303841]"
@@ -164,8 +165,8 @@ const ChatItem = ({
         </div>
       )}
 
-      <AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
-        <AlertDialogContent className="w-96 !p-4">
+      {/* <AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
+        <AlertDialogContent className="w-96 p-4!">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-base font-medium">
               Delete Chat
@@ -191,7 +192,17 @@ const ChatItem = ({
             </AlertDialogAction>
           </div>
         </AlertDialogContent>
-      </AlertDialog>
+      </AlertDialog> */}
+      <ConfirmDialog
+        open={alertOpen}
+        onOpenChange={setAlertOpen}
+        title="Delete Chat"
+        description="Are you sure you want to delete this chat? This action cannot be undone."
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        onConfirm={() => onConfirmDelete(chat.id)}
+        variant="destructive"
+      />
     </li>
   );
 };

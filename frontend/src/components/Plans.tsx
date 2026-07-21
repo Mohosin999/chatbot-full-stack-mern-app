@@ -87,10 +87,7 @@ const Plans = () => {
         open={!!comingSoonPlan}
         onOpenChange={(open) => !open && setComingSoonPlan(null)}
       >
-        <DialogContent className="sm:max-w-md dark:bg-[#222222]">
-          <DialogClose className="absolute right-4 top-4 p-2 rounded-full bg-[#333333] opacity-70 hover:opacity-100 transition cursor-pointer">
-            <X className="w-4 h-4" />
-          </DialogClose>
+        <DialogContent className="lg:max-w-md dark:bg-[#222222]">
           <DialogHeader>
             <DialogTitle className="text-center">
               <Sparkles className="w-10 h-10 text-blue-500 mx-auto mb-3" />

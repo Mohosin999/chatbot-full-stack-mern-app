@@ -2,7 +2,11 @@ import React, { useState, useMemo, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useDispatch } from "react-redux";
 import { useAppSelector } from "@/hooks/useAppStore";
-import { updateCustomInstructions, updateName, deleteAccount } from "@/features/user/userSlice";
+import {
+  updateCustomInstructions,
+  updateName,
+  deleteAccount,
+} from "@/features/user/userSlice";
 import { deleteAllChats } from "@/features/chat/chatSlice";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -15,7 +19,18 @@ import {
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
 import toast from "react-hot-toast";
-import { X, User, Database, Settings, Sun, Moon, Monitor, Palette, Trash2 } from "lucide-react";
+import {
+  X,
+  User,
+  Database,
+  Settings,
+  Sun,
+  Moon,
+  Monitor,
+  Palette,
+  Trash2,
+} from "lucide-react";
+import { CustomAlertDialog } from "./CustomAlertDialog";
 
 const SYSTEM_PROMPT_MAX_TOKENS = 6_400;
 
@@ -34,20 +49,35 @@ interface SettingsPopupProps {
 
 const tabs: { key: SettingsTab; label: string; icon: React.ReactNode }[] = [
   { key: "general", label: "General", icon: <Settings size={18} /> },
-  { key: "personalization", label: "Personalization", icon: <Palette size={18} /> },
+  {
+    key: "personalization",
+    label: "Personalization",
+    icon: <Palette size={18} />,
+  },
   { key: "profile", label: "Profile", icon: <User size={18} /> },
   { key: "data-control", label: "Data Control", icon: <Database size={18} /> },
 ];
 
-const SettingsPopup = ({ open, onOpenChange, initialTab }: SettingsPopupProps) => {
+const SettingsPopup = ({
+  open,
+  onOpenChange,
+  initialTab,
+}: SettingsPopupProps) => {
   const dispatch = useDispatch();
   const { profile, updating } = useAppSelector((state) => state.user);
-  const [activeTab, setActiveTab] = useState<SettingsTab>(initialTab || "general");
-  const [instructions, setInstructions] = useState(profile?.customInstructions || "");
-  const [themeMode, setThemeMode] = useState(localStorage.getItem("theme") || "light");
+  const [activeTab, setActiveTab] = useState<SettingsTab>(
+    initialTab || "general",
+  );
+  const [instructions, setInstructions] = useState(
+    profile?.customInstructions || "",
+  );
+  const [themeMode, setThemeMode] = useState(
+    localStorage.getItem("theme") || "light",
+  );
   const [nameInput, setNameInput] = useState(profile?.name || "");
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-  const [deleteAllChatsConfirmOpen, setDeleteAllChatsConfirmOpen] = useState(false);
+  const [deleteAllChatsConfirmOpen, setDeleteAllChatsConfirmOpen] =
+    useState(false);
   const tabsScrollRef = useRef<HTMLDivElement>(null);
 
   // ── (removed mobileView state) ──
@@ -76,7 +106,10 @@ const SettingsPopup = ({ open, onOpenChange, initialTab }: SettingsPopupProps) =
     }
   }, [open, profile?.customInstructions, profile?.name, initialTab]);
 
-  const tokenCount = useMemo(() => estimateTokens(instructions), [instructions]);
+  const tokenCount = useMemo(
+    () => estimateTokens(instructions),
+    [instructions],
+  );
   const overLimit = tokenCount > SYSTEM_PROMPT_MAX_TOKENS;
 
   const handleSaveInstructions = async () => {
@@ -149,89 +182,100 @@ const SettingsPopup = ({ open, onOpenChange, initialTab }: SettingsPopupProps) =
           className="relative flex bg-white dark:bg-[#1e1e1e] h-full w-full overflow-hidden lg:rounded-xl lg:w-[840px] lg:max-w-[90vw] lg:h-[560px] lg:max-h-[85vh] lg:shadow-2xl"
           onClick={(e) => e.stopPropagation()}
         >
-        <button
-          onClick={() => onOpenChange(false)}
-          className="absolute top-3 right-3 z-10 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 cursor-pointer hidden lg:block"
-        >
-          <X size={20} />
-        </button>
+          <button
+            onClick={() => onOpenChange(false)}
+            className="absolute top-3 right-3 z-10 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 cursor-pointer hidden lg:block"
+          >
+            <X size={20} />
+          </button>
 
-        {/* ═══════════════════════════════════════════════════════════════
+          {/* ═══════════════════════════════════════════════════════════════
             Small screen (< md): Full screen layout
             Top bar: Back (left) — Title (center) — Close (right)
             Horizontal scrollable tab buttons below
             Content below tabs
             ═══════════════════════════════════════════════════════════════ */}
-        <div className="flex flex-col w-full h-full lg:hidden">
-          {/* ── Small screen: top bar with title (left), close (right) ── */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-            <span className="text-sm font-semibold text-gray-900 dark:text-white">Settings</span>
-            <button
-              onClick={() => onOpenChange(false)}
-              className="flex items-center text-gray-600 dark:text-gray-400 cursor-pointer"
-            >
-              <X size={18} />
-            </button>
-          </div>
-
-          {/* ── Small screen: horizontal scrollable tab buttons ── */}
-          <div
-            ref={tabsScrollRef}
-            className="flex gap-2 px-4 py-3 overflow-x-auto border-b border-gray-200 dark:border-gray-700"
-            style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" }}
-          >
-            {tabs.map((tab) => (
+          <div className="flex flex-col w-full h-full lg:hidden">
+            {/* ── Small screen: top bar with title (left), close (right) ── */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+              <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                Settings
+              </span>
               <button
-                key={tab.key}
-                onClick={() => handleMobileTabSelect(tab.key)}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap transition-colors cursor-pointer shrink-0 ${
-                  activeTab === tab.key
-                    ? "bg-[#48A4FF] text-white"
-                    : "text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-[#303841] hover:bg-gray-200 dark:hover:bg-[#3a4553]"
-                }`}
+                onClick={() => onOpenChange(false)}
+                className="flex items-center text-gray-600 dark:text-gray-400 cursor-pointer"
               >
-                {tab.icon}
-                {tab.label}
+                <X size={18} />
               </button>
-            ))}
+            </div>
+
+            {/* ── Small screen: horizontal scrollable tab buttons ── */}
+            <div
+              ref={tabsScrollRef}
+              className="flex gap-2 px-4 py-3 overflow-x-auto border-b border-gray-200 dark:border-gray-700"
+              style={{
+                scrollbarWidth: "none",
+                msOverflowStyle: "none",
+                WebkitOverflowScrolling: "touch",
+              }}
+            >
+              {tabs.map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => handleMobileTabSelect(tab.key)}
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap transition-colors cursor-pointer shrink-0 ${
+                    activeTab === tab.key
+                      ? "bg-[#48A4FF] text-white"
+                      : "text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-[#303841] hover:bg-gray-200 dark:hover:bg-[#3a4553]"
+                  }`}
+                >
+                  {tab.icon}
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {/* ── Small screen: tab content below tabs ── */}
+            <div className="flex-1 overflow-y-auto p-4">
+              {renderTabContent(activeTab)}
+            </div>
           </div>
 
-          {/* ── Small screen: tab content below tabs ── */}
-          <div className="flex-1 overflow-y-auto p-4">
+          {/* ═══════════════════════════════════════════════════════════════
+            Medium and up: original sidebar + content layout
+            ═══════════════════════════════════════════════════════════════ */}
+          <div className="hidden lg:flex lg:flex-col w-56 shrink-0 bg-gray-50 dark:bg-[#252525] p-4 border-r border-gray-200 dark:border-gray-700">
+            <h2 className="text-base font-semibold text-gray-900 dark:text-white mb-6">
+              Settings
+            </h2>
+            <nav className="flex flex-col gap-1 flex-1">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => {
+                    setActiveTab(tab.key);
+                    window.location.hash = `#settings/${tab.key}`;
+                  }}
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-start cursor-pointer ${
+                    activeTab === tab.key
+                      ? "bg-[#48A4FF] text-white"
+                      : "text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-[#303841] hover:text-gray-900 dark:hover:text-white"
+                  }`}
+                >
+                  {tab.icon}
+                  {tab.label}
+                </button>
+              ))}
+            </nav>
+          </div>
+
+          <div className="hidden lg:flex lg:flex-col flex-1 p-6 overflow-y-auto">
             {renderTabContent(activeTab)}
           </div>
         </div>
-
-        {/* ═══════════════════════════════════════════════════════════════
-            Medium and up: original sidebar + content layout
-            ═══════════════════════════════════════════════════════════════ */}
-        <div className="hidden lg:flex lg:flex-col w-56 flex-shrink-0 bg-gray-50 dark:bg-[#252525] p-4 border-r border-gray-200 dark:border-gray-700">
-          <h2 className="text-base font-semibold text-gray-900 dark:text-white mb-6">Settings</h2>
-          <nav className="flex flex-col gap-1 flex-1">
-            {tabs.map((tab) => (
-              <button
-                key={tab.key}
-                onClick={() => { setActiveTab(tab.key); window.location.hash = `#settings/${tab.key}`; }}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-start cursor-pointer ${
-                  activeTab === tab.key
-                    ? "bg-[#48A4FF] text-white"
-                    : "text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-[#303841] hover:text-gray-900 dark:hover:text-white"
-                }`}
-              >
-                {tab.icon}
-                {tab.label}
-              </button>
-            ))}
-          </nav>
-        </div>
-
-        <div className="hidden lg:flex lg:flex-col flex-1 p-6 overflow-y-auto">
-          {renderTabContent(activeTab)}
-        </div>
       </div>
-    </div>
     </>,
-    document.body
+    document.body,
   );
 
   // ── Shared tab content renderer ──
@@ -239,7 +283,9 @@ const SettingsPopup = ({ open, onOpenChange, initialTab }: SettingsPopupProps) =
     if (tab === "profile") {
       return (
         <div className="space-y-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Profile</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            Profile
+          </h3>
           <div className="flex items-center gap-4">
             <Avatar className="w-16 h-16">
               <AvatarImage src={profile?.avatar || ""} />
@@ -248,13 +294,19 @@ const SettingsPopup = ({ open, onOpenChange, initialTab }: SettingsPopupProps) =
               </AvatarFallback>
             </Avatar>
             <div>
-              <p className="text-base font-medium text-gray-900 dark:text-white">{profile?.name || "User"}</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">{profile?.email || ""}</p>
+              <p className="text-base font-medium text-gray-900 dark:text-white">
+                {profile?.name || "User"}
+              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                {profile?.email || ""}
+              </p>
             </div>
           </div>
           <div className="border-t border-gray-200 dark:border-gray-700 pt-4 space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-900 dark:text-white mb-1">Name</label>
+              <label className="block text-sm font-medium text-gray-900 dark:text-white mb-1">
+                Name
+              </label>
               <input
                 value={nameInput}
                 onChange={(e) => setNameInput(e.target.value)}
@@ -272,9 +324,12 @@ const SettingsPopup = ({ open, onOpenChange, initialTab }: SettingsPopupProps) =
             </div>
           </div>
           <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-            <h4 className="text-sm font-medium text-red-600 dark:text-red-400 mb-2">Danger Zone</h4>
+            <h4 className="text-sm font-medium text-red-600 dark:text-red-400 mb-2">
+              Danger Zone
+            </h4>
             <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
-              Once you delete your account, there is no going back. All your data and chats will be permanently removed.
+              Once you delete your account, there is no going back. All your
+              data and chats will be permanently removed.
             </p>
             <button
               onClick={() => setDeleteConfirmOpen(true)}
@@ -283,22 +338,40 @@ const SettingsPopup = ({ open, onOpenChange, initialTab }: SettingsPopupProps) =
               <Trash2 size={16} /> Delete Account
             </button>
           </div>
-          <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+          {/* <AlertDialog
+            open={deleteConfirmOpen}
+            onOpenChange={setDeleteConfirmOpen}
+          >
             <AlertDialogContent className="w-[420px] !p-5">
               <AlertDialogHeader>
-                <AlertDialogTitle className="text-base font-medium">Delete Account</AlertDialogTitle>
+                <AlertDialogTitle className="text-base font-medium">
+                  Delete Account
+                </AlertDialogTitle>
                 <AlertDialogDescription className="text-sm text-gray-700 dark:text-gray-400 mt-2">
-                  Are you sure? This action <span className="font-semibold text-red-500">cannot be undone</span>.
+                  Are you sure? This action{" "}
+                  <span className="font-semibold text-red-500">
+                    cannot be undone
+                  </span>
+                  .
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <ul className="list-disc pl-5 space-y-1.5 text-sm text-gray-600 dark:text-gray-400 -mt-1">
-                <li>Your profile and all personal data will be permanently deleted.</li>
-                <li>All your chats and conversation history will be lost forever.</li>
-                <li>You will be logged out and redirected to the login page.</li>
+                <li>
+                  Your profile and all personal data will be permanently
+                  deleted.
+                </li>
+                <li>
+                  All your chats and conversation history will be lost forever.
+                </li>
+                <li>
+                  You will be logged out and redirected to the login page.
+                </li>
                 <li>Any active subscriptions or plans will be terminated.</li>
               </ul>
               <div className="flex justify-end gap-2">
-                <AlertDialogCancel className="px-3 py-1 rounded border text-sm cursor-pointer">Cancel</AlertDialogCancel>
+                <AlertDialogCancel className="px-3 py-1 rounded border text-sm cursor-pointer">
+                  Cancel
+                </AlertDialogCancel>
                 <AlertDialogAction
                   onClick={handleDeleteAccount}
                   className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm cursor-pointer"
@@ -307,7 +380,32 @@ const SettingsPopup = ({ open, onOpenChange, initialTab }: SettingsPopupProps) =
                 </AlertDialogAction>
               </div>
             </AlertDialogContent>
-          </AlertDialog>
+          </AlertDialog> */}
+
+          <CustomAlertDialog
+            open={deleteConfirmOpen}
+            onOpenChange={setDeleteConfirmOpen}
+            title="Delete Account"
+            description={
+              <>
+                Are you sure? This action{" "}
+                <span className="font-semibold text-red-400">
+                  cannot be undone
+                </span>
+                .
+              </>
+            }
+            bulletPoints={[
+              "Your profile and all personal data will be permanently deleted.",
+              "All your chats and conversation history will be lost forever.",
+              "You will be logged out and redirected to the login page.",
+              "Any active subscriptions or plans will be terminated.",
+            ]}
+            confirmLabel="Confirm Delete"
+            cancelLabel="Cancel"
+            onConfirm={handleDeleteAccount}
+            variant="destructive"
+          />
         </div>
       );
     }
@@ -315,11 +413,16 @@ const SettingsPopup = ({ open, onOpenChange, initialTab }: SettingsPopupProps) =
     if (tab === "personalization") {
       return (
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Personalization</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            Personalization
+          </h3>
           <div>
-            <label className="block text-sm font-medium text-gray-900 dark:text-white mb-1">Instructions for Chatbot</label>
+            <label className="block text-sm font-medium text-gray-900 dark:text-white mb-1">
+              Instructions for Chatbot
+            </label>
             <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
-              These instructions will be included in every prompt you send to the AI.
+              These instructions will be included in every prompt you send to
+              the AI.
             </p>
             <textarea
               value={instructions}
@@ -329,9 +432,13 @@ const SettingsPopup = ({ open, onOpenChange, initialTab }: SettingsPopupProps) =
               className="w-full border border-gray-300 dark:border-gray-600 rounded-lg p-3 text-sm bg-transparent resize-none focus:outline-none focus:ring-2 focus:ring-[#48A4FF] text-gray-900 dark:text-white placeholder-gray-400"
             />
             <div className="flex items-center justify-between mt-1">
-              <span className={`text-xs ${overLimit ? "text-red-500 font-medium" : tokenCount > SYSTEM_PROMPT_MAX_TOKENS * 0.8 ? "text-yellow-500" : "text-gray-400"}`}>
-                {tokenCount.toLocaleString()} / {SYSTEM_PROMPT_MAX_TOKENS.toLocaleString()} tokens
-                {overLimit && ` — exceeds limit by ${(tokenCount - SYSTEM_PROMPT_MAX_TOKENS).toLocaleString()} tokens`}
+              <span
+                className={`text-xs ${overLimit ? "text-red-500 font-medium" : tokenCount > SYSTEM_PROMPT_MAX_TOKENS * 0.8 ? "text-yellow-500" : "text-gray-400"}`}
+              >
+                {tokenCount.toLocaleString()} /{" "}
+                {SYSTEM_PROMPT_MAX_TOKENS.toLocaleString()} tokens
+                {overLimit &&
+                  ` — exceeds limit by ${(tokenCount - SYSTEM_PROMPT_MAX_TOKENS).toLocaleString()} tokens`}
               </span>
             </div>
           </div>
@@ -357,14 +464,22 @@ const SettingsPopup = ({ open, onOpenChange, initialTab }: SettingsPopupProps) =
     if (tab === "general") {
       return (
         <div className="space-y-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">General</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            General
+          </h3>
           <div>
-            <label className="block text-sm font-medium text-gray-900 dark:text-white mb-3">Theme</label>
+            <label className="block text-sm font-medium text-gray-900 dark:text-white mb-3">
+              Theme
+            </label>
             <div className="flex gap-2">
               {[
                 { value: "light", label: "Light", icon: <Sun size={16} /> },
                 { value: "dark", label: "Dark", icon: <Moon size={16} /> },
-                { value: "system", label: "System", icon: <Monitor size={16} /> },
+                {
+                  value: "system",
+                  label: "System",
+                  icon: <Monitor size={16} />,
+                },
               ].map((option) => (
                 <button
                   key={option.value}
@@ -388,12 +503,18 @@ const SettingsPopup = ({ open, onOpenChange, initialTab }: SettingsPopupProps) =
     if (tab === "data-control") {
       return (
         <div className="space-y-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Data Control</h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Manage your data and privacy settings.</p>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            Data Control
+          </h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Manage your data and privacy settings.
+          </p>
           <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
             <div className="flex items-center justify-between">
               <div>
-                <h4 className="text-sm font-medium text-gray-900 dark:text-white">Delete all chats</h4>
+                <h4 className="text-sm font-medium text-gray-900 dark:text-white">
+                  Delete all chats
+                </h4>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                   Permanently remove all your conversations.
                 </p>
@@ -406,7 +527,7 @@ const SettingsPopup = ({ open, onOpenChange, initialTab }: SettingsPopupProps) =
               </button>
             </div>
           </div>
-          <AlertDialog open={deleteAllChatsConfirmOpen} onOpenChange={setDeleteAllChatsConfirmOpen}>
+          {/* <AlertDialog open={deleteAllChatsConfirmOpen} onOpenChange={setDeleteAllChatsConfirmOpen}>
             <AlertDialogContent className="w-[420px] !p-5">
               <AlertDialogHeader>
                 <AlertDialogTitle className="text-base font-medium">Delete All Chats</AlertDialogTitle>
@@ -429,7 +550,31 @@ const SettingsPopup = ({ open, onOpenChange, initialTab }: SettingsPopupProps) =
                 </AlertDialogAction>
               </div>
             </AlertDialogContent>
-          </AlertDialog>
+          </AlertDialog> */}
+
+          <CustomAlertDialog
+            open={deleteAllChatsConfirmOpen}
+            onOpenChange={setDeleteAllChatsConfirmOpen}
+            title="Delete All Chats"
+            description={
+              <>
+                Are you sure? This action{" "}
+                <span className="font-semibold text-red-400">
+                  cannot be undone
+                </span>
+                .
+              </>
+            }
+            bulletPoints={[
+              "All your chats and conversation history will be permanently deleted.",
+              "Your account and profile settings will remain unchanged.",
+              "This action cannot be reversed.",
+            ]}
+            confirmLabel="Confirm Delete"
+            cancelLabel="Cancel"
+            onConfirm={handleDeleteAllChats}
+            variant="destructive"
+          />
         </div>
       );
     }
