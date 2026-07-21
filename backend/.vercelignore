@@ -1,9 +1,8 @@
 Dockerfile
 .dockerignore
 docker-compose.yml
-tsconfig.json
-src/
 test.http
 swagger.yaml
 .gitignore
 README.md
+node_modules
