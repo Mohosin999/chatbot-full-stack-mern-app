@@ -62,8 +62,11 @@ const Home = () => {
             <FiMenu size={24} />
           </Button>
 
-          <div className="flex items-center justify-center mx-auto">
-            <h2 className="text-xl font-semibold ml-2">Chatbot</h2>
+          <div className="flex items-center gap-2 justify-center mx-auto">
+            <img src="./vite.png" alt="App Logo" className="w-7 h-7" />
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+              ChatBOT
+            </h2>
           </div>
         </div>
       </header>
@@ -71,7 +74,7 @@ const Home = () => {
       <div className="flex flex-1 relative">
         {/* ---------------- Sidebar for large screens ---------------- */}
         <aside
-          className="hidden lg:block bg-[#F9FAFB] dark:bg-[#181818] h-screen overflow-hidden shrink-0 transition-[width] duration-500 ease-in-out border-r border-gray-300 dark:border-gray-700"
+          className="hidden lg:block bg-[#F9FAFB] dark:bg-[#181818] h-screen overflow-hidden shrink-0 transition-[width] duration-500 ease-in-out border-r border-gray-300 dark:border-[#212121]"
           style={{ width: collapsed ? 0 : 300 }}
         >
           <div className="min-w-[260px] h-full">
@@ -108,7 +111,7 @@ const Home = () => {
           ></div>
 
           <div
-            className={`absolute top-0 left-0 w-72 h-full bg-[#181818] text-white shadow-lg flex flex-col transition-transform duration-300 ease-in-out ${
+            className={`absolute top-0 left-0 w-72 h-full bg-[#F9FAFB] dark:bg-[#181818] text-white shadow-lg flex flex-col transition-transform duration-300 ease-in-out ${
               isSidebarOpen ? "translate-x-0" : "-translate-x-full"
             }`}
           >

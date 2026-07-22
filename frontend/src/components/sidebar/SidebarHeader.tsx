@@ -59,7 +59,7 @@ const SidebarHeader = ({
 
       <button
         onClick={onCreateChat}
-        className="flex items-center justify-center gap-2 w-full p-2.5 rounded-full border border-white dark:border-[#43454A] bg-white dark:bg-[#43454A] text-gray-800 dark:text-gray-100 hover:bg-white/80 dark:hover:bg-[#43454A]/80 transition cursor-pointer text-sm mb-3 shadow-sm"
+        className="flex items-center justify-center gap-2 w-full p-2.5 rounded-full border border-white dark:border-[#43454A] bg-white dark:bg-[#43454A] text-gray-800 dark:text-gray-100 hover:bg-white/80 dark:hover:bg-[#43454A]/80 transition cursor-pointer text-sm mb-3 shadow-sm active:scale-101"
       >
         <Plus size={16} /> Add New Chat
       </button>

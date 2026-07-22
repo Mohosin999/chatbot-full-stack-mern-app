@@ -338,49 +338,6 @@ const SettingsPopup = ({
               <Trash2 size={16} /> Delete Account
             </button>
           </div>
-          {/* <AlertDialog
-            open={deleteConfirmOpen}
-            onOpenChange={setDeleteConfirmOpen}
-          >
-            <AlertDialogContent className="w-[420px] !p-5">
-              <AlertDialogHeader>
-                <AlertDialogTitle className="text-base font-medium">
-                  Delete Account
-                </AlertDialogTitle>
-                <AlertDialogDescription className="text-sm text-gray-700 dark:text-gray-400 mt-2">
-                  Are you sure? This action{" "}
-                  <span className="font-semibold text-red-500">
-                    cannot be undone
-                  </span>
-                  .
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <ul className="list-disc pl-5 space-y-1.5 text-sm text-gray-600 dark:text-gray-400 -mt-1">
-                <li>
-                  Your profile and all personal data will be permanently
-                  deleted.
-                </li>
-                <li>
-                  All your chats and conversation history will be lost forever.
-                </li>
-                <li>
-                  You will be logged out and redirected to the login page.
-                </li>
-                <li>Any active subscriptions or plans will be terminated.</li>
-              </ul>
-              <div className="flex justify-end gap-2">
-                <AlertDialogCancel className="px-3 py-1 rounded border text-sm cursor-pointer">
-                  Cancel
-                </AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={handleDeleteAccount}
-                  className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm cursor-pointer"
-                >
-                  Confirm Delete
-                </AlertDialogAction>
-              </div>
-            </AlertDialogContent>
-          </AlertDialog> */}
 
           <CustomAlertDialog
             open={deleteConfirmOpen}
@@ -527,30 +484,6 @@ const SettingsPopup = ({
               </button>
             </div>
           </div>
-          {/* <AlertDialog open={deleteAllChatsConfirmOpen} onOpenChange={setDeleteAllChatsConfirmOpen}>
-            <AlertDialogContent className="w-[420px] !p-5">
-              <AlertDialogHeader>
-                <AlertDialogTitle className="text-base font-medium">Delete All Chats</AlertDialogTitle>
-                <AlertDialogDescription className="text-sm text-gray-700 dark:text-gray-400 mt-2">
-                  Are you sure? This action <span className="font-semibold text-red-500">cannot be undone</span>.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <ul className="list-disc pl-5 space-y-1.5 text-sm text-gray-600 dark:text-gray-400 -mt-1">
-                <li>All your chats and conversation history will be permanently deleted.</li>
-                <li>Your account and profile settings will remain unchanged.</li>
-                <li>This action cannot be reversed.</li>
-              </ul>
-              <div className="flex justify-end gap-2">
-                <AlertDialogCancel className="px-3 py-1 rounded border text-sm cursor-pointer">Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={handleDeleteAllChats}
-                  className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm cursor-pointer"
-                >
-                  Confirm Delete
-                </AlertDialogAction>
-              </div>
-            </AlertDialogContent>
-          </AlertDialog> */}
 
           <CustomAlertDialog
             open={deleteAllChatsConfirmOpen}

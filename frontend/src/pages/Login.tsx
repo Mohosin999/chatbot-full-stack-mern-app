@@ -142,8 +142,8 @@ const Login = () => {
                     Question what's next
                   </h2>
                   <p className="text-gray-300 text-base">
-                    A thinking partner that remembers your conversations, understands
-                    context, and helps you think deeper
+                    A thinking partner that remembers your conversations,
+                    understands context, and helps you think deeper
                   </p>
                 </div>
               </div>
@@ -270,7 +270,7 @@ const Login = () => {
                 </form>
               </Form>
 
-              <p className="text-center text-sm text-gray-400 mt-6">
+              <p className="text-center text-sm text-gray-400 mt-6 mb-12">
                 {mode === "login" ? (
                   <>
                     Don't have an account?{" "}

@@ -20,7 +20,9 @@ import type { Message as MessageType } from "@/types";
 import toast from "react-hot-toast";
 
 const ContentArea = () => {
-  const { currentChat, isGenerating, error } = useAppSelector((state) => state.chat);
+  const { currentChat, isGenerating, error } = useAppSelector(
+    (state) => state.chat,
+  );
 
   useEffect(() => {
     if (error) {
@@ -95,7 +97,10 @@ const ContentArea = () => {
     }
   }, [accessToken, currentChat, currentChat?.data?.messages, isGenerating]);
 
-  const handleSend = async (text: string, files?: { name: string; mimeType: string; data: string }[]) => {
+  const handleSend = async (
+    text: string,
+    files?: { name: string; mimeType: string; data: string }[],
+  ) => {
     if (!accessToken) return;
     if (!text.trim() && (!files || !files.length)) return;
 
@@ -113,7 +118,9 @@ const ContentArea = () => {
       await dispatch(getChatById(currentChatId) as any);
 
       if (text.trim()) {
-        dispatch(updateChatName({ chatId: currentChatId, chatName: text.trim() }));
+        dispatch(
+          updateChatName({ chatId: currentChatId, chatName: text.trim() }),
+        );
       }
     }
 
@@ -124,7 +131,11 @@ const ContentArea = () => {
     };
 
     if (files && files.length > 0) {
-      userMsg.files = files.map((f) => ({ name: f.name, mimeType: f.mimeType, data: f.data }));
+      userMsg.files = files.map((f) => ({
+        name: f.name,
+        mimeType: f.mimeType,
+        data: f.data,
+      }));
     }
 
     dispatch(addTempMessage(userMsg));
@@ -173,71 +184,72 @@ const ContentArea = () => {
   };
 
   return (
-    <div className="h-screen bg-white dark:bg-[#212121] pb-6 pt-16 lg:pt-6 flex flex-col relative">
+    <div className="flex flex-col h-screen bg-white dark:bg-[#212121] pb-6 pt-16 lg:pt-6 relative">
       {(() => {
         const messages = currentChat?.data?.messages;
         const hasMessages = messages && messages.length > 0;
 
-        // if (!accessToken) {
-        //   return (
-        //     <div className="flex-1 flex flex-col items-center justify-center">
-        //       <img src="./vite.png" alt="Logo" className="w-30 h-30 mb-4" />
-        //       <h2 className="text-3xl md:text-5xl px-4 md:px-0 font-bold text-gray-800 dark:text-gray-100 mb-10">
-        //         What's on your <span className="text-[#48A4FF]">mind?</span>
-        //       </h2>
-        //     </div>
-        //   );
-        // }
-
         if (hasMessages) {
           return (
             <>
-              <div className="flex-1 flex flex-col overflow-y-auto" ref={chatContainerRef}>
-                <div className="px-4 xl:pr-1 relative flex-1">
-                  <div className="flex flex-col space-y-4 w-full md:max-w-2xl xl:max-w-3xl mx-auto mt-4 relative">
-                    {messages!.map((msg) => (
-                      <Message key={msg.id} msg={msg} onEdit={isGenerating ? undefined : handleEdit} />
-                    ))}
-                    <div ref={messagesEndRef} />
+              <div
+                className="flex-1 overflow-y-auto"
+                ref={chatContainerRef}
+                style={{ scrollbarGutter: "stable" }}
+              >
+                <div className="min-h-full flex flex-col relative">
+                  <div className="flex-1 custom-padding pb-3">
+                    <div className="flex flex-col space-y-4 mt-4 relative">
+                      {messages!.map((msg) => (
+                        <Message
+                          key={msg.id}
+                          msg={msg}
+                          onEdit={isGenerating ? undefined : handleEdit}
+                        />
+                      ))}
+                      <div ref={messagesEndRef} />
+                    </div>
+                  </div>
+
+                  <div className="sticky bottom-0 custom-padding bg-white dark:bg-[#212121] z-10">
+                    {showScrollButton && (
+                      <button
+                        onClick={scrollToBottom}
+                        className="absolute -top-12 right-2 md:right-8 lg:right-10 p-2 bg-white dark:bg-[#303030] text-gray-700 dark:text-gray-200 rounded-full shadow-lg hover:bg-gray-100 dark:hover:bg-[#3a3a3a] border border-gray-300 dark:border-gray-600 transition z-10 cursor-pointer"
+                      >
+                        <ChevronDown size={20} />
+                      </button>
+                    )}
+
+                    <ChatInput
+                      ref={chatInputRef}
+                      onSend={handleSend}
+                      isStreaming={hasStreamingMessage}
+                      onStop={abortStream}
+                    />
                   </div>
                 </div>
-              </div>
-
-              <div className="w-full md:max-w-2xl xl:max-w-3xl mx-auto relative">
-                {showScrollButton && (
-                  <button
-                    onClick={scrollToBottom}
-                    className="absolute -top-12 right-2 p-2 bg-white dark:bg-[#303030] text-gray-700 dark:text-gray-200 rounded-full shadow-lg hover:bg-gray-100 dark:hover:bg-[#3a3a3a] border border-gray-300 dark:border-gray-600 transition z-10 cursor-pointer"
-                  >
-                    <ChevronDown size={20} />
-                  </button>
-                )}
-
-                <ChatInput
-                  ref={chatInputRef}
-                  onSend={handleSend}
-                  isStreaming={hasStreamingMessage}
-                  onStop={abortStream}
-                />
               </div>
             </>
           );
         }
 
+        {
+          /* ----------- Chat input without content message ---------- */
+        }
         return (
-          <div className="flex-1 flex flex-col items-center justify-center px-0">
+          <div className="flex-1 flex flex-col items-center justify-center custom-padding">
             <img src="./vite.png" alt="Logo" className="w-30 h-30 mb-4" />
             <h2 className="text-3xl md:text-4xl xl:text-5xl font-bold text-gray-800 dark:text-gray-100 mb-8">
               What's on your <span className="text-[#48A4FF]">mind?</span>
             </h2>
-            <div className="w-full md:max-w-2xl xl:max-w-3xl">
-              <ChatInput
-                ref={chatInputRef}
-                onSend={handleSend}
-                isStreaming={false}
-                onStop={abortStream}
-              />
-            </div>
+
+            <ChatInput
+              ref={chatInputRef}
+              onSend={handleSend}
+              isStreaming={false}
+              onStop={abortStream}
+            />
           </div>
         );
       })()}

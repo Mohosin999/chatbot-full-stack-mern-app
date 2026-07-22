@@ -69,6 +69,13 @@ const ChatItem = ({
     setMenuOpen((prev) => !prev);
   }, []);
 
+  const handleContextMenu = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setMenuPos({ top: e.clientY, left: e.clientX - 80 });
+    setMenuOpen(true);
+  }, []);
+
   const saveRename = async (newName: string) => {
     const trimmed = newName.trim();
     if (!trimmed || trimmed === chat.name) {
@@ -83,6 +90,7 @@ const ChatItem = ({
   return (
     <li
       onClick={() => onSelectChat(chat.id)}
+      onContextMenu={handleContextMenu}
       className={`group text-sm flex items-center justify-between p-1 px-3 rounded-lg cursor-pointer transition select-none ${
         isSelected
           ? "bg-gray-200 dark:bg-[#303841]"
@@ -122,7 +130,7 @@ const ChatItem = ({
           ref={btnRef}
           onClick={openMenu}
           className={`p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 active:scale-105 transition cursor-pointer inline-flex ${
-            isSelected ? "visible" : "invisible group-hover:visible"
+            isSelected ? "visible" : "lg:invisible lg:group-hover:visible"
           }`}
         >
           <BsThreeDots className="text-gray-500 dark:text-gray-400" />
@@ -165,34 +173,6 @@ const ChatItem = ({
         </div>
       )}
 
-      {/* <AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
-        <AlertDialogContent className="w-96 p-4!">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-base font-medium">
-              Delete Chat
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-sm lg:text-base text-gray-700 dark:text-gray-400 mt-1">
-              Are you sure you want to delete this chat? This action cannot be
-              undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-
-          <div className="flex justify-end gap-2 mt-4">
-            <AlertDialogCancel className="px-3 py-1 rounded border text-sm cursor-pointer select-none active:scale-105">
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => {
-                onConfirmDelete(chat.id);
-                setAlertOpen(false);
-              }}
-              className="bg-red-600 text-white px-3 py-1 rounded text-sm cursor-pointer select-none active:scale-105"
-            >
-              Delete
-            </AlertDialogAction>
-          </div>
-        </AlertDialogContent>
-      </AlertDialog> */}
       <ConfirmDialog
         open={alertOpen}
         onOpenChange={setAlertOpen}

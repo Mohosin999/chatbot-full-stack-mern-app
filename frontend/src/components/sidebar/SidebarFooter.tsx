@@ -187,34 +187,6 @@ const SidebarFooter = ({ token, onLogout, onLogin }: SidebarFooterProps) => {
               </div>
             )}
 
-            {/* <AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
-              <AlertDialogContent className="lg:max-w-md p-4! bg-[#FFFFFF] dark:bg-[#222222]">
-                <AlertDialogHeader>
-                  <AlertDialogTitle className="text-base font-medium">
-                    Log Out
-                  </AlertDialogTitle>
-                  <AlertDialogDescription className="text-sm text-gray-700 dark:text-gray-400 mt-1">
-                    Are you sure you want to log out? You'll need to log in
-                    again to access your account.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-
-                <div className="flex justify-end gap-2 mt-4">
-                  <AlertDialogCancel className="px-3 py-1 rounded-full border text-sm cursor-pointer select-none active:scale-105">
-                    Cancel
-                  </AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={() => {
-                      onLogout();
-                      setAlertOpen(false);
-                    }}
-                    className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-full text-sm cursor-pointer select-none active:scale-105"
-                  >
-                    Logout
-                  </AlertDialogAction>
-                </div>
-              </AlertDialogContent>
-            </AlertDialog> */}
             <ConfirmDialog
               open={alertOpen}
               onOpenChange={setAlertOpen}

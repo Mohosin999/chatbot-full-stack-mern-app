@@ -126,6 +126,10 @@
   }
 }
 
+.custom-padding {
+  @apply px-4 md:px-14 lg:px-20 xl:px-48;
+}
+
 /* Hide scrollbar but keep scrolling */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
