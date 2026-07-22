@@ -178,16 +178,16 @@ const ContentArea = () => {
         const messages = currentChat?.data?.messages;
         const hasMessages = messages && messages.length > 0;
 
-        if (!accessToken) {
-          return (
-            <div className="flex-1 flex flex-col items-center justify-center">
-              <img src="./vite.png" alt="Logo" className="w-30 h-30 mb-4" />
-              <h2 className="text-3xl md:text-5xl px-4 md:px-0 font-bold text-gray-800 dark:text-gray-100 mb-10">
-                What's on your <span className="text-[#48A4FF]">mind?</span>
-              </h2>
-            </div>
-          );
-        }
+        // if (!accessToken) {
+        //   return (
+        //     <div className="flex-1 flex flex-col items-center justify-center">
+        //       <img src="./vite.png" alt="Logo" className="w-30 h-30 mb-4" />
+        //       <h2 className="text-3xl md:text-5xl px-4 md:px-0 font-bold text-gray-800 dark:text-gray-100 mb-10">
+        //         What's on your <span className="text-[#48A4FF]">mind?</span>
+        //       </h2>
+        //     </div>
+        //   );
+        // }
 
         if (hasMessages) {
           return (
@@ -225,9 +225,9 @@ const ContentArea = () => {
         }
 
         return (
-          <div className="flex-1 flex flex-col items-center justify-center px-4">
+          <div className="flex-1 flex flex-col items-center justify-center px-0">
             <img src="./vite.png" alt="Logo" className="w-30 h-30 mb-4" />
-            <h2 className="text-3xl md:text-5xl font-bold text-gray-800 dark:text-gray-100 mb-8">
+            <h2 className="text-3xl md:text-4xl xl:text-5xl font-bold text-gray-800 dark:text-gray-100 mb-8">
               What's on your <span className="text-[#48A4FF]">mind?</span>
             </h2>
             <div className="w-full md:max-w-2xl xl:max-w-3xl">
